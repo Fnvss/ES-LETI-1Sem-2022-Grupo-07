@@ -46,8 +46,15 @@ class ReadFileTest {
 	}
 
 	@Test
-	void test() {
-		fail("Not yet implemented");
+	void test()  {
+		try {
+		//ReadFile.readICSFile();
+		ReadFile.ICSWritter("https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=ramss3@iscte.pt&password=gGdsqZehHOOyFFAPMPSk8VeB63LPV0scP4qR36srE3dMgEB3b8GPIxCKorPUzQeySmm0XoAR7K0gw8pA5QrVrvx1VwfVrgjOFhMlC0mQkG6UxWuE4R2n12xxgV9hYfbX");
+		} catch(Throwable t) {
+			fail("Not yet implemented");
+			
+		}
+		
 	}
 
 }
