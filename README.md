@@ -1,4 +1,4 @@
-# ES-2022-LETI-Grupo-07
+# ES-LETI-1Sem-2022-Grupo-07
 98931 Filipe Vasconcelos
 98472 Rafael Silva
 98731 Guilherme Mendes
