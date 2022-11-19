@@ -30,6 +30,11 @@
     	<artifactId>ical4j</artifactId>
     	<version>4.0.0-beta2</version>
     </dependency>
+    <dependency>
+    	<groupId>org.swinglabs</groupId>
+    	<artifactId>swingx</artifactId>
+    	<version>1.6.1</version>
+    </dependency>
   </dependencies>
 
   <build>
