@@ -35,6 +35,11 @@
     	<artifactId>swingx</artifactId>
     	<version>1.6.1</version>
     </dependency>
+    <dependency>
+    	<groupId>com.calendarfx</groupId>
+    	<artifactId>view</artifactId>
+    	<version>11.12.3</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -2,13 +2,14 @@ package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -17,6 +18,8 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
+import java.io.FileReader;
+import net.fortuna.ical4j.data.UnfoldingReader;
 
 public class Schedule {
 
@@ -25,17 +28,25 @@ public class Schedule {
 	//final static SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	final static SimpleDateFormat inputDateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
+	public Schedule() {
+
+	}
+
 	public Schedule(List<Event> events, List<Element> elements) {
 		this.events = events;
 		this.elements= elements;
 	}
 
-
-	public void addEvents(String name, String webLink) throws IOException, ParserException, ParseException {
-		
-		Element element = new Element(name);	
+	public Schedule(List<Event> events, Element element) {
+		this.events = events;
 		elements.add(element);
-		URL url = new URL(webLink);
+	}
+
+
+	public void addElement(Element element) throws IOException, ParserException, ParseException {
+
+		elements.add(element);
+		URL url = new URL(element.webLink);
 		InputStream file = url.openStream();
 		CalendarBuilder builder = new CalendarBuilder();
 		Calendar calendar = builder.build(file);
@@ -46,33 +57,42 @@ public class Schedule {
 			String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
 			Date endDate = inputDateFormat.parse(aux2.replaceAll("Z$", ""));
 			String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
-			if(compareEvents(startDate,summary)) {
-					Event event = new Event(startDate,endDate,summary,elements);
-					events.add(event);
+			Event newEvent = new Event(startDate,endDate,summary,element);
+			int indexOfNewEvent = events.indexOf(newEvent);
+			if(indexOfNewEvent != -1) {
+				events.get(indexOfNewEvent).addElement(element);
 			} else {
-				Event event = new Event(startDate,endDate,summary,element);
-				events.add(event);
-			}
+				events.add(newEvent);
+			}		
 		}
+		Collections.sort(events);
 	}
 
-	private boolean compareEvents(Date date, String summary) {
-		for(int i = 0; i < events.size(); i++) {
-			if(events.get(i).startDate.equals(date) && events.get(i).summary.equals(summary)) {
-				return true;
-			}
+	public Schedule readCalendar(Element element) {
+		if(elements.size() == 0) {
+			System.out.println("Elements are empty!");
 		}
-		return false;
+		List<Event> filteredList = events.stream().filter(event -> event.getElements().contains(element)).collect(Collectors.toList());
+		List<Event> newList = new ArrayList<>();
+		for(Event e : filteredList) {
+			newList.add(e);
+		}
+//		for(Event e : newList) {
+//			if(e.getElements().size() > 1) {
+//				e.getElements().clear();
+//				e.addElement(element);
+//			}
+//		}
+		Schedule newSchedule = new Schedule(newList, element);
+
+		return newSchedule;
 	}
 
-	private boolean compareElement(Element element) {
-		for(int i = 0; i < elements.size(); i++) {
-			if(elements.get(i).equals(element)) {
-				return true;
-			}
-		}
-		return false;
+	public List<Element> getElements() {
+		return elements;
 	}
+
+
 
 	/**
 	 * @return the events
@@ -84,6 +104,7 @@ public class Schedule {
 		}
 		return this.events;
 	}
+
 
 	/**
 	 * @param events the events to set
