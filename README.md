@@ -6,8 +6,8 @@
 
 Sprint 1:
 -Ler URL
--Passar para JSON
+-Passar para ICS
 
 Sprint 2:
 -Menu
--Ver disponibilidade
+-Calendário
