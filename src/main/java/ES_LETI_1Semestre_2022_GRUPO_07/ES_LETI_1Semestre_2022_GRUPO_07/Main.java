@@ -12,8 +12,8 @@ public class Main {
 	public static void main(String[] args) throws IOException, ParserException, ParseException {
 		// TODO Auto-generated method stub
 		//Login teste = new Login();
-		
-		
+
+
 		List<Event> events = new ArrayList<>();
 		List<Element> elements = new ArrayList<>();
 		Schedule schedule = new Schedule(events, elements);
@@ -30,11 +30,7 @@ public class Main {
 		for(Event e : list) {
 			System.out.println(e.toString());			
 		}
-		
 
+
+	}
 }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> refs/remotes/origin/fnvss
