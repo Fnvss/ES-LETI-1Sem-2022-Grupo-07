@@ -3,20 +3,25 @@ package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 import java.util.Objects;
 
 public class Element {
-
+	
 	String name;
 	String webLink;
-
+	
 	public Element(String name, String webLink) {
 		this.webLink = webLink;
 		this.name = name;
 	}
-
-
+	
+	/**
+	 * @return the name of a specific element.
+	 */
 	public String getName() {
 		return name;
 	}
-
+	
+	/**
+	 * @param name the name to set
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -29,7 +34,9 @@ public class Element {
 		return clonedElement;
 	}
 
-
+	/**
+	 * @return a boolean saying if the comparing objects are equal(true) or not(false).
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -44,12 +51,15 @@ public class Element {
 	}
 
 
+	/**
+	 * @return a string with the name of the element.
+	 */
 	@Override
 	public String toString() {
 		return name;
 	}
-
-
-
-
+	
+	
+	
+	
 }
