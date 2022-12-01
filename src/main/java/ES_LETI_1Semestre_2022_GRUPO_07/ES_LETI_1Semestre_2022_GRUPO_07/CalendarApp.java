@@ -8,6 +8,7 @@ import com.calendarfx.model.Calendar.Style;
 import com.calendarfx.model.CalendarSource;
 import com.calendarfx.view.CalendarView;
 import com.calendarfx.model.Entry;
+import com.calendarfx.*;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -34,6 +35,9 @@ public class CalendarApp extends Application {
 
 		Filipe.addEntry(aula1);
 		Rafael.addEntry(aula2);
+		
+		CalendarView calendarViews = new CalendarView();
+		//calendarViews.setCalendarSourceFactory(param -> new MyCalendarSource());
 
 		Filipe.setStyle(Style.STYLE1); 
 		Rafael.setStyle(Style.STYLE2);
@@ -42,7 +46,7 @@ public class CalendarApp extends Application {
 
 		CalendarSource myCalendarSource = new CalendarSource("My Calendars"); 
 		myCalendarSource.getCalendars().addAll(Filipe, Rafael, Guilherme, Tomás);
-
+		
 		calendarView.getCalendarSources().addAll(myCalendarSource);
 		calendarView.setRequestedTime(LocalTime.now());
 
