@@ -19,6 +19,10 @@ public class Element {
 		return name;
 	}
 	
+	public String getUrl() {
+		return webLink;
+	}
+	
 	/**
 	 * @param name the name to set
 	 */

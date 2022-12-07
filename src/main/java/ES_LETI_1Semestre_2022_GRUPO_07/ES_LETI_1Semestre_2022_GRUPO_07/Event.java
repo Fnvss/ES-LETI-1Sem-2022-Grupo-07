@@ -101,12 +101,44 @@ public class Event implements Comparable<Event> {
 			this.elements.add(element);
 		}
 	}
+	
+	public boolean collidesWithEvent(Event other) {
+		if(this.getStartDate().getMonth().equals(other.getStartDate().getMonth())) {
+			if(this.getStartDate().getDayOfMonth() == other.getStartDate().getDayOfMonth()) {
+
+				//comeca antes acaba depois
+				if(other.getStartDate().isBefore(this.getStartDate()) 
+					&& other.getEndDate().isAfter(this.getEndDate())) {
+					return true;
+				}
+				//comeca antes acaba dentro
+				if(other.getStartDate().isBefore(this.getStartDate()) 
+					&& other.getEndDate().isAfter(this.getStartDate()) 
+					&& other.getEndDate().isBefore(this.getEndDate())) {
+					return true;
+				}
+				//comeca dentro acaba depois
+				if(other.getStartDate().isAfter(this.getStartDate()) 
+					&& other.getStartDate().isBefore(this.getEndDate()) 
+					&& other.getEndDate().isAfter(this.getEndDate())) {
+
+					return true;
+				}
+				//comeca dentro acaba dentro
+				if(other.getStartDate().isAfter(this.getStartDate()) 
+					&& other.getEndDate().isBefore(this.getEndDate())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 
 //	@Override
 //	public Event clone() throws CloneNotSupportedException {
-//		ZonedDateTime clonedStartDate = (ZonedDateTime) this.startDate.clone();
-//		ZonedDateTime clonedEndDate = (ZonedDateTime) this.endDate.clone();
+//		LocalDateTime clonedStartDate = (LocalDateTime) this.startDate.clone();
+//		LocalDateTime clonedEndDate = (LocalDateTime) this.endDate.clone();
 //		String clonedSummary = this.summary;
 //		List<Element> cloneList = new ArrayList<>();
 //		for (Element e: elements) cloneList.add(e.clone());
@@ -133,7 +165,7 @@ public class Event implements Comparable<Event> {
 	
 
 	/**
-	 * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
+	 * @return a negative integer, zero, or a positive integer as this Event is before date, equal to, or greater than the specified date.
 	 */
 
 	@Override

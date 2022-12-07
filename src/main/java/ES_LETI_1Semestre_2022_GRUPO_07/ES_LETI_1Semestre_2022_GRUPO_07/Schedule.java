@@ -6,6 +6,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
@@ -88,6 +89,7 @@ public class Schedule {
 		Collections.sort(events);
 	}
 
+
 	/**
 	 * Reads the calendar of a specific element.
 	 * Sees if the list of elements is not empty and create another list from the events list filtering it by the specific element
@@ -114,6 +116,7 @@ public class Schedule {
 
 		return newSchedule;
 	}
+
 
 	/**
 	 * Reads all available calendars from the events list.
@@ -145,7 +148,7 @@ public class Schedule {
 		return newSchedule;
 	}
 
-	//public Schedule 
+
 	/**
 	 * Following the input of a specific month, it searches for the events in a specific day
 	 * @return the events in a specific day of a month.
@@ -165,64 +168,84 @@ public class Schedule {
 		Schedule newSchedule = new Schedule(newList, elements);
 		return newSchedule;
 	}
-	
-	private boolean sameDay(LocalDateTime date, LocalDateTime newDate) {
-		if(!date.getMonth().equals(newDate.getMonth())) {
-			return false;
+
+	public boolean addReunion(Event newEvent, List<Event> eventList) {
+
+		for(Event e: eventList) {
+			if(!e.collidesWithEvent(newEvent)) {
+				this.events.add(newEvent);
+				return true;
+			}
 		}
-		return date.getDayOfMonth() == newDate.getDayOfMonth();
+		return false;
 	}
-	
-//	private void checkHours() {
-//		for(int i = inicioManhaHora; i <= fimManhaHora; i++) {
-//			for(int j = inicioManhaMinuto; j <= fimManhaMinuto; j++) {
-//				Event event = new Event(LocalDateTime
-//				for(Event e: events) {
-//					
-//				}
-//			}
-//			
-//		}
-//	}
+
+
+
+
 
 	//manha ou tarde, analisando os elementos em questao ver o horario de disponibilidade dos mesmos para marcar uma reuniao e ver qual
-	// a mnelhor hora par afazer a reuniao com todos os elementos
+	// a mnelhor hora par a fazer a reuniao com todos os elementos
 
-	public List<Event> checkAvailableDate(LocalDateTime day, List<Element> elementsList, String timeOfTheDay, String duration) {
+	public List<Event> checkAvailableDate(List<Element> elementsList, String timeOfTheDay, String duration) {
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
 				System.out.println("Invalid element in list");
 				break;
 			}	
 		}
-
+		
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime time = LocalDateTime.now();
 		List<Event> eventsForSpecificElements = events.stream().filter(event -> 
 		!Collections.disjoint(event.getElements(), elementsList)
 				).collect(Collectors.toList());		
-
+		List<Event> eventsList = null;
+		int endHour = 0;
+		int endMinute = 0;
+		int startHour = 0;
+		int startMinute = 0;
+		Boolean insert = false;
+		
+		
 		if(timeOfTheDay.equalsIgnoreCase("Manhã")) {
-			List<Event> filteredListMorning = eventsForSpecificElements.stream()
-					.filter(event ->
-					sameDay(day, event.getStartDate()) &&
+			eventsList = eventsForSpecificElements.stream()
+					.filter(event -> 
+					event.getStartDate().isAfter(now) &&
 					event.startDate.getHour() <= fimManhaHora &&
 					event.startDate.getMinute() <= fimManhaMinuto
 							).collect(Collectors.toList());
-			return filteredListMorning;
-			//			for(Event e: filteredListMorning) {				
-			//			}
+			startHour = inicioManhaHora;
+			startMinute = inicioManhaMinuto;
+			endHour = fimManhaHora;
+			endMinute = fimManhaMinuto;
+			
 		} else if(timeOfTheDay.equalsIgnoreCase("Tarde")) {
-			List<Event> filteredListEvening = eventsForSpecificElements.stream()
+			eventsList = eventsForSpecificElements.stream()
 					.filter(event ->
-					sameDay(day, event.getStartDate()) &&
+					event.getStartDate().isAfter(now) &&
 					event.startDate.getHour() >= inicioTardeHora &&
 					event.startDate.getMinute() >= inicioTardeMinuto
 							).collect(Collectors.toList());
-			//			for(Event e: filteredListEvening) {
-			//				
-			//			}
-			return filteredListEvening;
+			startHour = inicioTardeHora;
+			startMinute = inicioTardeMinuto;
+			endHour = fimTardeHora;
+			endMinute = fimTardeMinuto;
 		}
 		
+		time = time.withHour(startHour).withMinute(startMinute);
+		
+		while(!insert) {
+			while(now.getHour() <= endHour && now.getMinute() <= endMinute) {
+				time = now.plusMinutes(1);
+				//verificar evento
+				insert = true;
+				
+			}	
+			//avançar o dia
+			time = now.plusDays(1).withHour(startHour).withMinute(startMinute);
+		}
+
 		return null;
 
 
