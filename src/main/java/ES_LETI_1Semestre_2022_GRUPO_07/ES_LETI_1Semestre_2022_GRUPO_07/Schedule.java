@@ -1,7 +1,9 @@
+
 package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,7 +40,7 @@ public class Schedule {
 	private final int inicioTardeHora = 13;
 	private final int inicioTardeMinuto = 0;
 	private final int fimTardeHora = 20;
-	private final int fimTardeMinuto = 0;
+	private final int fimTardeMinuto = 59;
 
 
 	public Schedule() {
@@ -66,11 +68,11 @@ public class Schedule {
 	 */
 	public void addElementToSchedule(Element element) throws IOException, ParserException, ParseException {
 
-		elements.add(element);
 		URL url = new URL(element.webLink);
 		InputStream file = url.openStream();
 		CalendarBuilder builder = new CalendarBuilder();
 		Calendar calendar = builder.build(file);
+		Boolean bAux = false;
 
 		for(CalendarComponent comp : calendar.getComponents()) {
 			String aux = (String) comp.getRequiredProperty("DTSTART").getValue();
@@ -78,15 +80,61 @@ public class Schedule {
 			String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
 			LocalDateTime endDate = LocalDateTime.parse(aux2.replaceAll("Z$", ""), inputDateFormat);
 			String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
-			Event newEvent = new Event(startDate,endDate,summary,element);
+			String finalSummary = filterString(summary);				
+			Event newEvent = new Event(startDate,endDate,finalSummary,element);
 			int indexOfNewEvent = events.indexOf(newEvent);
 			if(indexOfNewEvent != -1) {
 				events.get(indexOfNewEvent).addElement(element);
 			} else {
+				bAux = true;
 				events.add(newEvent);
 			}		
 		}
+		if(bAux != false) {
+			elements.add(element);
+		}
 		Collections.sort(events);
+		PrintStream out = new PrintStream("Horário.txt");
+        System.setOut(out);
+	}
+	
+//	public void ScheduleTxt(Element element) throws IOException, ParserException, ParseException {
+//		addElementToSchedule(element);
+//		PrintStream out = new PrintStream("Horário.txt");
+//		System.setOut(out);
+//	}
+	
+	public String filterString(String s) {
+		String[] aux = s.split(" -");
+		String summary = aux[0];
+		s = "";
+		if(summary.contains("Exame")) {
+			s = s + summary.valueOf("Exame")+": ";
+			summary = summary.replaceAll("Exame: ", "");
+		}
+		
+		if(summary.contains("Teste")) {
+			s = s + summary.valueOf("Teste") +": ";
+			summary = summary.replaceAll("Teste: ", "");
+		}
+		if(summary.contains("Avaliação Contínua")) {
+			s = s + summary.valueOf("Avaliação Contínua")+": ";
+			summary = summary.replaceAll("Avaliação Contínua: ", "");
+		}
+		
+		s = getUpperChars(summary, s);
+		return s;
+	}
+	
+	public String getUpperChars(String s, String string) {
+		
+		for(int i = 0; i< s.length(); i++) {
+			char c = s.charAt(i);
+			if(Character.isUpperCase(c) ) {
+				string = string + c;
+			}
+		}
+		return string;
 	}
 
 
@@ -106,12 +154,6 @@ public class Schedule {
 		for(Event e : filteredList) {
 			newList.add(e);
 		}
-		//		for(Event e : newList) {
-		//			if(e.getElements().size() > 1) {
-		//				e.getElements().clear();
-		//				e.addElement(element);
-		//			}
-		//		}
 		Schedule newSchedule = new Schedule(newList, element);
 
 		return newSchedule;
@@ -131,7 +173,6 @@ public class Schedule {
 		return newSchedule;
 	}
 
-	//public Schedule 
 	/**
 	 * @return the events in a specific month.
 	 */
@@ -169,25 +210,19 @@ public class Schedule {
 		return newSchedule;
 	}
 
-	public boolean addReunion(Event newEvent, List<Event> eventList) {
 
-		for(Event e: eventList) {
-			if(!e.collidesWithEvent(newEvent)) {
-				this.events.add(newEvent);
-				return true;
-			}
-		}
-		return false;
-	}
-
-
-
-
-
+	/**
+	 * Following the input of a list of elements that the costumer wants to have in the reunion, an info if he wants the reunion
+	 * at morning or afternoon and the duration for the reunion. First it checks if all of the elements in the input exist, then 
+	 * it's created a list of events for the specific elements for the reunion, using a filter. Then a list of events that occurs
+	 * in the morning or afternoon, it depends according with the input. At the end, it starts to search for available dates for the reunion,
+	 * starting the search for the closest possible time.
+	 * @return the created reunion.
+	 */
 	//manha ou tarde, analisando os elementos em questao ver o horario de disponibilidade dos mesmos para marcar uma reuniao e ver qual
 	// a mnelhor hora par a fazer a reuniao com todos os elementos
 
-	public List<Event> checkAvailableDate(List<Element> elementsList, String timeOfTheDay, String duration) {
+	public Event checkAvailableDate(List<Element> elementsList, String timeOfTheDay, int duration) {
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
 				System.out.println("Invalid element in list");
@@ -195,65 +230,81 @@ public class Schedule {
 			}	
 		}
 		
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime time = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
+		LocalDateTime time = LocalDateTime.now().withSecond(0).withNano(0);
 		List<Event> eventsForSpecificElements = events.stream().filter(event -> 
 		!Collections.disjoint(event.getElements(), elementsList)
 				).collect(Collectors.toList());		
 		List<Event> eventsList = null;
 		int endHour = 0;
-		int endMinute = 0;
 		int startHour = 0;
 		int startMinute = 0;
-		Boolean insert = false;
-		
+
 		
 		if(timeOfTheDay.equalsIgnoreCase("Manhã")) {
 			eventsList = eventsForSpecificElements.stream()
 					.filter(event -> 
 					event.getStartDate().isAfter(now) &&
-					event.startDate.getHour() <= fimManhaHora &&
-					event.startDate.getMinute() <= fimManhaMinuto
+					event.getStartDate().getHour() <= fimManhaHora &&
+					event.getStartDate().getMinute() <= fimManhaMinuto
 							).collect(Collectors.toList());
 			startHour = inicioManhaHora;
 			startMinute = inicioManhaMinuto;
 			endHour = fimManhaHora;
-			endMinute = fimManhaMinuto;
-			
+
 		} else if(timeOfTheDay.equalsIgnoreCase("Tarde")) {
 			eventsList = eventsForSpecificElements.stream()
 					.filter(event ->
 					event.getStartDate().isAfter(now) &&
-					event.startDate.getHour() >= inicioTardeHora &&
-					event.startDate.getMinute() >= inicioTardeMinuto
+					event.getStartDate().getHour() >= inicioTardeHora &&
+					event.getStartDate().getMinute() >= inicioTardeMinuto
 							).collect(Collectors.toList());
 			startHour = inicioTardeHora;
 			startMinute = inicioTardeMinuto;
 			endHour = fimTardeHora;
-			endMinute = fimTardeMinuto;
+		}
+		Collections.sort(eventsList);
+
+		//a hora aqui esta a ir para as 13:00 do dia now
+		if(now.getHour() > endHour) {
+			
+			time = time.plusDays(1).withHour(startHour).withMinute(startMinute);
 		}
 		
-		time = time.withHour(startHour).withMinute(startMinute);
-		
-		while(!insert) {
-			while(now.getHour() <= endHour && now.getMinute() <= endMinute) {
-				time = now.plusMinutes(1);
-				//verificar evento
-				insert = true;
+		if(now.getHour() < startHour) {
+			time = time.withHour(startHour).withMinute(startMinute);
+		}
+
+		Event evento = new Event(time, time.plusMinutes(duration), "Reunião", elementsList);
+
+		outerloop:
+		while(true) {
+			while(time.getHour() <= endHour && time.plusMinutes(duration).getHour() <= endHour) {
 				
-			}	
+				evento.setStartDate(time);
+				evento.setEndDate(time.plusMinutes(duration));
+				
+				List<Event> head = eventsList.subList(0, 1);
+				if(head.size() == 0) {
+					this.events.add(evento);
+					break outerloop;
+				}
+				if(!head.get(0).collidesWithEvent(evento)) {
+					this.events.add(evento);
+					break outerloop;
+				}
+				
+				eventsList = eventsList.subList(1, eventsList.size()); // tail
+				time = head.get(0).getEndDate();
+				
+			}
 			//avançar o dia
 			time = now.plusDays(1).withHour(startHour).withMinute(startMinute);
 		}
 
-		return null;
-
-
+		return evento;
 	}
 
-
-
-	//public Schedule 
 	/**
 	 * @return the elements list.
 	 */
@@ -280,9 +331,5 @@ public class Schedule {
 	public void setEvents(List<Event> events) {
 		this.events = events;
 	}
-
-
-
-
 
 }

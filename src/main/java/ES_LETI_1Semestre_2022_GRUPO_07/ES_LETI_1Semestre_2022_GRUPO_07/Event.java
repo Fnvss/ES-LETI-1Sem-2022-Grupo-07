@@ -6,9 +6,9 @@ import java.util.List;
 
 public class Event implements Comparable<Event> {
 
-	LocalDateTime startDate;
-	LocalDateTime endDate;
-	String summary;
+	private LocalDateTime startDate;
+	private LocalDateTime endDate;
+	private String summary;
 
 	List<Element> elements = new ArrayList<>();
 
@@ -102,9 +102,22 @@ public class Event implements Comparable<Event> {
 		}
 	}
 	
+	/*
+	 * it checks if an Event collides with another one.
+	 * Based in 5 possible ways to collide.
+	 * Both Event objects start with the same hour, one starts first and ends after the other,
+	 * starts first and ends between the start and end date of the other event,
+	 * start between the start and end date of the other event and ends after the other end date
+	 * and the last possible way, starts and ends between the start and end dates from the other event.
+	 */
 	public boolean collidesWithEvent(Event other) {
 		if(this.getStartDate().getMonth().equals(other.getStartDate().getMonth())) {
 			if(this.getStartDate().getDayOfMonth() == other.getStartDate().getDayOfMonth()) {
+				
+				//começa a mesma hora
+				if(other.getStartDate().isEqual(this.getStartDate())) {
+					return true;
+				}
 
 				//comeca antes acaba depois
 				if(other.getStartDate().isBefore(this.getStartDate()) 
@@ -182,7 +195,7 @@ public class Event implements Comparable<Event> {
 	 */
 	@Override
 	public String toString() {
-		return "Event [Data Ínicio: " + startDate + ", Data fim: " + endDate + ", Cadeira: " + summary + ",element: "
+		return "Event [Data Ínicio: " + startDate + ", Data fim: " + endDate + ", Evento: " + summary + ",elements: "
 				+ elements;
 	}
 
