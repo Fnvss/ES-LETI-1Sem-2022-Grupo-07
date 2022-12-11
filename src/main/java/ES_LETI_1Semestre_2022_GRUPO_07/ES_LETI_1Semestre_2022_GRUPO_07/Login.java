@@ -30,6 +30,10 @@ public class Login implements ActionListener {
 
 	public static Login instance;
 
+	/**
+	 * Instance object that creates a new login menu if it doesn't exist
+	 */
+
 	public static Login getInstance() {
 		if(instance == null) 
 			instance = new Login();
@@ -39,43 +43,63 @@ public class Login implements ActionListener {
 
 	public Login() {
 
-		//Exit_on_close for the frame
+		/**
+		 * Exit_on_close for the frame
+		 */
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		//Set up the panel
+		/*
+		 * Set up the panel
+		 */
 		contentPane.setOpaque(true);
 		contentPane.setBackground(Color.GRAY);
 		contentPane.setLayout(null);
 
-		//Set MainText size, font and location
+		/**
+		 * Set MainText size, font and location
+		 */
 		label.setFont(new Font("Calibri", Font.BOLD, 24));
 		label.setBounds(93, 0, 300, 100);
 
-		//Set name text box size and location
+		/*
+		 * Set name text box size and location
+		 */
 		name.setBounds(95, 90, 300, 30);
 		name.setPrompt("Insert a name");
 		name.setPromptForeground(Color.DARK_GRAY);
 
-		//Set url text box size and location
+		/*
+		 * Set url text box size and location
+		 */
 		url.setBounds(95, 130, 300, 30);
 		url.setPrompt("Insert an Url");
 		url.setPromptForeground(Color.DARK_GRAY);
 
-		//Set size and location of the button
+		/*
+		 * Set size and location of the calendar button
+		 */
 		calendarButton.setBounds(95, 180, 130, 30);
 
-		//Set button size and location
+		/*
+		 * Set button size and location of the add member button
+		 */
 		addMemberButton.setBounds(265, 180, 130, 30);
 
-
+		/*
+		 * Set button size and location of the reunion button
+		 */
 		reunionButton.setBounds(95, 230, 130, 30);
-	
 
+		/*
+		 * Set button size and location of the members list button
+		 */
 		seeMembersList.setBounds(265, 230, 130, 30);
 
 
 
-		//Put objects into the panel
+		/*
+		 * Put objects into the panel
+		 */
 		contentPane.add(label);
 		contentPane.add(addMemberButton);
 		contentPane.add(calendarButton);
@@ -84,13 +108,17 @@ public class Login implements ActionListener {
 		contentPane.add(url);
 		contentPane.add(seeMembersList);
 
-		//Create frame
+		/*
+		 * Create frame
+		 */
 		frame.setContentPane(contentPane);
 		frame.setSize(500, 350);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 
-		//ActionListener for enter
+		/*
+		 * ActionListener for enter
+		 */
 		addMemberButton.addActionListener(this);
 		calendarButton.addActionListener(this);
 		reunionButton.addActionListener(this);
@@ -101,11 +129,27 @@ public class Login implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
+
+		/*
+		 * it opens the calendar window when the calendar button its pressed.
+		 */
 		if(ae.getActionCommand() == calendarButton.getActionCommand()) {
-			schedule.readAllCalendars();
+			if(schedule.getElements().size() == 0) {
+				JOptionPane.showMessageDialog(null, "No elements inserted!");
+			} else {
+				try {
+					CalendarViews.weeklyView();
+				} catch (IOException | ParserException | ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 
 		}
 
+		/*
+		 * it creates an element, if it doesn't exist already, with the name and url received in the JTextFields.
+		 */
 		if(ae.getActionCommand() == addMemberButton.getActionCommand()) {
 			if(name.getText().isEmpty() || url.getText().isEmpty()) {
 				JOptionPane.showMessageDialog(null, "Please insert a name/ url");
@@ -113,6 +157,7 @@ public class Login implements ActionListener {
 			}
 			String elementName = name.getText();
 			String elementUrl = url.getText();
+
 			Element element = new Element(elementName, elementUrl);
 
 			for(Element e: schedule.getElements()) {
@@ -123,7 +168,7 @@ public class Login implements ActionListener {
 			}
 
 			if(schedule.getElements().indexOf(element) != -1) {
-				JOptionPane.showMessageDialog(null, elementName+ " Already Exists!");
+				JOptionPane.showMessageDialog(null, "The inserted element Already Exists!");
 				return;
 			}
 			try {
@@ -136,16 +181,24 @@ public class Login implements ActionListener {
 			JOptionPane.showMessageDialog(null, elementName+ " has been registered!");
 			name.setText(null);
 			url.setText(null);
-
-
 		}
 
+		/*
+		 * it opens the reunion window when the reunion button its pressed.
+		 */
 		if(ae.getActionCommand() == reunionButton.getActionCommand()) {
-			frame.dispose();
-			ReunionWindow newWindow = new ReunionWindow(schedule);	
+			if(schedule.getElements().size() >= 1) {
+				frame.dispose();
+				ReunionWindow newWindow = new ReunionWindow(schedule);		
+			} else {
+				JOptionPane.showMessageDialog(null,"Insert elements first!!");
+			}
 
 		}
 
+		/*
+		 * it opens a list of all elements already inserted.
+		 */
 		if(ae.getActionCommand() == seeMembersList.getActionCommand()) {
 			if(schedule.getElements().size() >= 1) {
 				MembersList list = new MembersList(schedule);	
@@ -159,5 +212,6 @@ public class Login implements ActionListener {
 	public JFrame getFrameInstance() {
 		return frame;
 	}
+
 
 }
