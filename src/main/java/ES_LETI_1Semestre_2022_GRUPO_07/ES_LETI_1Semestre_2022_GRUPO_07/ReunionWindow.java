@@ -4,11 +4,15 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -24,7 +28,11 @@ import javax.swing.text.PlainDocument;
 
 import org.jdesktop.swingx.JXTextField;
 
-
+/**
+ * The ReunionWindow class represents a window for scheduling reunions.
+ * It extends the JFrame class and contains a panel, a label, a button,
+ * a text field, a combo box, a list, and several other components.
+ */
 public class ReunionWindow implements ActionListener {
 
 	JFrame frame = new JFrame();
@@ -39,72 +47,73 @@ public class ReunionWindow implements ActionListener {
 	TimeOfDay timeOfDay;
 	String time;
 	int durationTime = 0;
-	JXTextField duration;
+	JXTextField duration = new JXTextField();
 	JXTextField periodicity;
 	List<Element> elementsReunion = new ArrayList<>();
 	int periodicityTime = 0;
 
+	/**
+	 * Constructs a new ReunionWindow with the specified schedule.
+	 *
+	 * @param schedule the schedule to be used for the reunion window
+	 */
 	ReunionWindow(Schedule schedule) {
 
-		/**
-		 * Exit_on_close for the frame
-		 */
+		// Exit_on_close for the frame
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		/*
-		 * Set up the panel
-		 */
+		// Set up the panel
+
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Color.GRAY);
+		contentPane.setBackground(new Color(243,242,242));
 		contentPane.setLayout(null);
 
-		/**
-		 * Set MainText size, font and location
+		/*
+		 * Load the Icon image
+		 * Then sets the icon image of the JFrame
 		 */
+		Image iconImage = null;
+		try {
+			iconImage = ImageIO.read(new File("icon.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		frame.setIconImage(iconImage); 
+
+		// Set MainText size, font and location
 		label.setBounds(170, 10, 200, 90);
 		label.setFont(new Font("Calibri", Font.BOLD, 18));
 
-		/*
-		 * Sets the size and location of the button to go to the previous window
-		 */
+		// Sets the size and location of the button to go to the previous window
 		backButton.setBounds(20,10,70,30);
 
-
-		/*
-		 * Set duration text box size and location, allowing only integers in the text box
-		 */
-		duration  = new JXTextField();
+		// Set duration text box size and location, allowing only integers in the text box
 		PlainDocument filter = (PlainDocument) duration.getDocument();
 		filter.setDocumentFilter(new IntegerFilter());
 		duration.setBounds(95, 120, 100, 30);
 
-		/*
-		 * Set text prompt in the reunion text box.
-		 */
-		duration.setPrompt("Reunion duration");
+		// Set text prompt in the reunion text box.
+		duration.setPrompt("Minutes");
 		duration.setPromptForeground(Color.DARK_GRAY);
+		duration.setHorizontalAlignment(SwingConstants.CENTER);
 
-		/*
-		 * Set info for duration box size and location.
-		 */
+		// Set info for duration box size and location.
 		dateLabel.setBounds(40, 120, 300, 30);
 
-		/*
-		 * Creates a ComboBox to select with the TimeOfDay enum, for the user setect which time he wants to appoint the reunion.
+		/* Creates a ComboBox to select with the TimeOfDay enum,
+		 * for the user setect which time he wants to appoint the reunion.
 		 */
 		timeOfDayCombo.setModel(new DefaultComboBoxModel(TimeOfDay.values()));
 		timeOfDayCombo.setRenderer(new MyComboBoxRenderer("Time"));
 		timeOfDayCombo.setSelectedIndex(-1);
 		((JLabel)timeOfDayCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
-		/*
-		 * Set size and location of the ComboBox.
-		 */
-		timeOfDayCombo.setBounds(95, 160, 100, 30);
+		// Set size and location of the ComboBox.
+		timeOfDayCombo.setBounds(95, 190, 100, 30);
 
-		/*
-		 * Creates a List of elements to be selected for the reunion, with the possibility of multiple selections.
-		 */
+		// Creates a List of elements to be selected for the reunion, with the possibility of multiple selections.
 		list = new JList(schedule.getElements().toArray());
 		list.setFixedCellHeight(15);
 		list.setFixedCellWidth(100);
@@ -112,40 +121,29 @@ public class ReunionWindow implements ActionListener {
 		list.setVisibleRowCount(4);
 		Dimension dimension = list.getPreferredSize();
 
-		/*
-		 * Set size and location of the list of elements.
-		 */
+		// Set size and location of the list of elements.
 		list.setBounds(265, 120, dimension.width, dimension.height);
 		list.setVisibleRowCount(4);
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		/*
-		 * Set duration text box size and location, allowing only integers in the text box
-		 */
+		// Set duration text box size and location, allowing only integers in the text box
 		periodicity  = new JXTextField();
 		PlainDocument filter2 = (PlainDocument) periodicity.getDocument();
 		filter2.setDocumentFilter(new IntegerFilter());
-		periodicity.setBounds(265, 160, 100, 30);
+		periodicity.setBounds(265, 190, 100, 30);
 
-		/*
-		 * Set text prompt in the reunion text box.
-		 */
+		// Set text prompt in the reunion text box.
 		periodicity.setPrompt("Periodicity");
 		periodicity.setPromptForeground(Color.DARK_GRAY);
+		periodicity.setHorizontalAlignment(SwingConstants.CENTER);
 
 
-		/*
-		 * Set size and location of the submit button.
-		 */
-		submitButton.setBounds(30,220,200,30);
+		// Set size and location of the submit button.
+		submitButton.setBounds(30,250,200,30);
 
-		submitPeriodicButton.setBounds(260, 220, 200, 30);
+		submitPeriodicButton.setBounds(260, 250, 200, 30);
 
-
-
-		/*
-		 * Put objects into the panel
-		 */
+		// Put objects into the panel
 		contentPane.add(label);
 		contentPane.add(timeOfDayCombo);
 		contentPane.add(backButton);
@@ -156,25 +154,29 @@ public class ReunionWindow implements ActionListener {
 		contentPane.add(dateLabel);
 		contentPane.add(periodicity);
 
-		/*
-		 * Create frame
-		 */
+		// Create frame
 		frame.setContentPane(contentPane);
 		frame.setSize(500, 350);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 
-		/*
-		 * ActionListener for enter
-		 */
+		// ActionListener for enter
 		backButton.addActionListener(this);
 		submitButton.addActionListener(this);
 		submitPeriodicButton.addActionListener(this);
 
 	}
 
-	/*
-	 * Creates a title for the ComboBox.
+	/**
+	 * Returns the component that will be used to render the title
+	 * in the combo box.
+	 *
+	 * @param list the JList component that the renderer is being used for
+	 * @param value the value of the item to be rendered
+	 * @param index the index of the item to be rendered
+	 * @param isSelected a boolean value indicating whether the item is currently selected
+	 * @param hasFocus a boolean value indicating whether the item currently has focus
+	 * @return the component that will be used to render the title
 	 */
 	class MyComboBoxRenderer extends JLabel implements ListCellRenderer
 	{
@@ -195,11 +197,15 @@ public class ReunionWindow implements ActionListener {
 		}
 	}
 
+	/**
+	 * Called when an action is performed on a component.
+	 *
+	 * @param ae the action event object
+	 */
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		/*
-		 * When the backButton it's pressed it goes back to the login window.
-		 */
+
+		// When the backButton it's pressed it goes back to the login window.
 		if(ae.getActionCommand() == backButton.getActionCommand()) {
 			frame.setVisible(false);
 			Login.getInstance().getFrameInstance().setVisible(true);		
@@ -207,7 +213,7 @@ public class ReunionWindow implements ActionListener {
 
 			durationTime = Integer.parseInt(duration.getText());
 			timeOfDay = (TimeOfDay) timeOfDayCombo.getSelectedItem();
-			
+
 			List<Element> elementsReunion = new ArrayList<>();
 			Object[] elements = list.getSelectedValues();
 			for(int i = 0; i < list.getSelectedValues().length; i++) {
@@ -215,20 +221,35 @@ public class ReunionWindow implements ActionListener {
 			}
 
 			/*
-			 * When the submitButton is pressed, it starts searching for a date for the reunion, with the inputs received on the reunion window
+			 * When the submitButton is pressed, it starts searching for a date for the reunion, 
+			 * with the inputs received on the reunion window.
 			 */
-
 			if(ae.getActionCommand() == submitButton.getActionCommand()) {
 				if(!elementsReunion.isEmpty()) {
-					System.out.println(Login.schedule.checkAvailableDate(elementsReunion, timeOfDay, durationTime));
+					try {
+						Login.schedule.checkAvailableDate(elementsReunion, timeOfDay, durationTime);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					JOptionPane.showMessageDialog(null," No elements inserted!");
 				}
 			}
+
+			/*
+			 * When the submitPeriodicButton is pressed, it starts searching for available dates for the periodic reunion, 
+			 * with the inputs received on the reunion window.
+			 */			
 			if(ae.getActionCommand() == submitPeriodicButton.getActionCommand()) {
 				periodicityTime = Integer.parseInt(periodicity.getText());
 				if(!elementsReunion.isEmpty()) {
-					System.out.println(Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime));
+					try {
+						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					JOptionPane.showMessageDialog(null," No elements inserted!");
 				}
