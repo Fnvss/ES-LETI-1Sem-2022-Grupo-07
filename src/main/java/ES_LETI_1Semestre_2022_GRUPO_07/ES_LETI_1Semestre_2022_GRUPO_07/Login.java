@@ -2,12 +2,14 @@ package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.ParseException;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -79,6 +81,7 @@ public class Login implements ActionListener {
 		 * Set size and location of the calendar button
 		 */
 		calendarButton.setBounds(95, 180, 130, 30);
+		
 
 		/*
 		 * Set button size and location of the add member button
@@ -137,14 +140,16 @@ public class Login implements ActionListener {
 			if(schedule.getElements().size() == 0) {
 				JOptionPane.showMessageDialog(null, "No elements inserted!");
 			} else {
-				try {
-					CalendarViews.weeklyView();
-				} catch (IOException | ParserException | ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					frame.dispose();
+//					CalendarViews.main(null);;
+//				} catch (IOException | ParserException | ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				CalendarWindow window = new CalendarWindow();
+				frame.dispose();
 			}
-
 		}
 
 		/*
@@ -188,7 +193,7 @@ public class Login implements ActionListener {
 		 */
 		if(ae.getActionCommand() == reunionButton.getActionCommand()) {
 			if(schedule.getElements().size() >= 1) {
-				frame.dispose();
+				frame.setVisible(false);
 				ReunionWindow newWindow = new ReunionWindow(schedule);		
 			} else {
 				JOptionPane.showMessageDialog(null,"Insert elements first!!");
