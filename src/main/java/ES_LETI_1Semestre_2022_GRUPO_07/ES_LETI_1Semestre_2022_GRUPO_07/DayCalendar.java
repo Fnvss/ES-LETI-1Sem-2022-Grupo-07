@@ -8,9 +8,14 @@ public class DayCalendar extends Calendar {
 
     private LocalDate calDate;
 
-    public DayCalendar(ArrayList<CalendarEvent> events) {
-        super(events);
-        calDate = LocalDate.now();
+//    public DayCalendar(ArrayList<CalendarEvent> events) {
+//        super(events);
+//        calDate = LocalDate.now();
+//    }
+    
+    public DayCalendar(ArrayList<CalendarEvent> events, LocalDate date) {
+    	super(events);
+    	calDate = date;
     }
 
     @Override
