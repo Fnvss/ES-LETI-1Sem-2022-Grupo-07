@@ -4,12 +4,15 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import javax.swing.JComboBox;
+
 public class WeekCalendar extends Calendar {
 
     private Week week;
 
     public WeekCalendar(ArrayList<CalendarEvent> events) {
-        super(events);
+      super(events);
+    	
         week = new Week(LocalDate.now());
     }
 
