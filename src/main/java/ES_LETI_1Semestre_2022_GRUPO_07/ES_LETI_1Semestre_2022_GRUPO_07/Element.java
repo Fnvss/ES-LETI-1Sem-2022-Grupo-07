@@ -1,5 +1,7 @@
 package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Objects;
 
 public class Element {
@@ -19,7 +21,7 @@ public class Element {
 		return name;
 	}
 	
-	public String getUrl() {
+	public String getWebLink() {
 		return webLink;
 	}
 	
@@ -52,6 +54,15 @@ public class Element {
 			return this.name.equals(other.name) && this.webLink.equals(other.webLink);
 		}
 		return false;
+	}
+	
+	/**
+	 * Creates a URL object with the input string.
+	 * @return an URL object for the string received.
+	 */
+	public URL getUrl(String webLink) throws MalformedURLException {
+		 URL url = new URL(webLink);
+		 return url;
 	}
 
 
