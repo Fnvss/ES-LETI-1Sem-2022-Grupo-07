@@ -1,46 +1,45 @@
 
 package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.net.URL;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalField;
-import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
-
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
+/**
+ * This class represents a schedule, with a list of events and a list of elements.
+ */
 public class Schedule {
 
 	private List<Event> events = new ArrayList<>();
 	private List<Element> elements = new ArrayList<>();
 	private final DateTimeFormatter inputDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-	private final int inicioManhaHora = 8;
-	private final int inicioManhaMinuto = 0;
-	private final int fimManhaHora = 12;
-	private final int fimManhaMinuto = 59;
-
-	private final int inicioTardeHora = 13;
-	private final int inicioTardeMinuto = 0;
-	private final int fimTardeHora = 20;
-	private final int fimTardeMinuto = 59;
 
 
+	/**
+     * Constructs a new Schedule with default values for its fields.
+     */
 	public Schedule() {
 
 	}
 
+	 /**
+     * Constructs a new Schedule with the specified list of events and elements.
+     *
+     * @param events the list of events for the schedule
+     * @param elements the list of elements for the schedule
+     */
 	public Schedule(List<Event> events, List<Element> elements) {
 		this.events = events;
 		this.elements= elements;
@@ -52,18 +51,17 @@ public class Schedule {
 	}
 
 	/**
-	 * Add an element to the schedule.
-	 * Receives an elements which contains an name and url, it adds the element to the list of elements and parse url to 
-	 * URL type. Creates the calendar type from the url and reads it. In the end, it sorts the events dates.
+	 * Adds an element to a schedule by parsing a calendar file from a URL and extracting events from the calendar.
 	 *
-	 * @throws IOException If an I/O error occurs.
-	 * @throws ParserException throws an exception when an error occurs in parsing iCalendar data.
-	 * @throws ParseException throws signals that an error has been reached unexpectedly while parsing.
+	 * @param element   the element to add to the schedule
+	 *
+	 * @throws IOException if an error occurs while opening the connection to the URL or reading from the calendar file
+	 * @throws ParserException if an error occurs while parsing the calendar file
+	 * @throws ParseException if an error occurs while parsing the date strings in the calendar file
 	 */
 	public void addElementToSchedule(Element element) throws IOException, ParserException, ParseException {
-
-		URL url = new URL(element.webLink);
-		InputStream file = url.openStream();
+		
+		InputStream file = element.getUrl(element.webLink).openStream();
 		CalendarBuilder builder = new CalendarBuilder();
 		Calendar calendar = builder.build(file);
 		Boolean bAux = false;
@@ -88,17 +86,22 @@ public class Schedule {
 			elements.add(element);
 		}
 		Collections.sort(events);
+		PrintStream out = new PrintStream("Horário.txt");
+		System.setOut(out);
 		for(Event e : this.events) {
 			System.out.println(e.toString());
 		}
 	}
-
-	//	public void ScheduleTxt(Element element) throws IOException, ParserException, ParseException {
-	//		addElementToSchedule(element);
-	//		PrintStream out = new PrintStream("Horário.txt");
-	//		System.setOut(out);
-	//	}
-
+		
+	/**
+	 * Filters a given string and returns a new string containing only certain substrings from the original string.
+	 * In this case, if the Summary starts with, "Exame", "Teste" or "AValiação Contínua", this won't 
+	 * be filtered by the uppercase, but the remaining words from the summary will be replaced.
+	 *
+	 * @param s  the string to filter
+	 *
+	 * @return the filtered string
+	 */
 	public String filterString(String s) {
 		String[] aux = s.split(" -");
 		String summary = aux[0];
@@ -121,6 +124,14 @@ public class Schedule {
 		return s;
 	}
 
+	/**
+	 * Extracts all uppercase letters from a given string and returns them as a new string.
+	 *
+	 * @param s  the string to extract uppercase letters from
+	 * @param string  the string to add the extracted uppercase letters to
+	 *
+	 * @return the string containing all of the extracted uppercase letters
+	 */
 	public String getUpperChars(String s, String string) {
 
 		for(int i = 0; i< s.length(); i++) {
@@ -137,7 +148,8 @@ public class Schedule {
 	 * Reads the calendar of a specific element.
 	 * Sees if the list of elements is not empty and create another list from the events list filtering it by the specific element
 	 * read the new filtered list and adds the events to an empty list
-	 * @return that new list.
+	 * @param element  element to create a schedule for
+	 * @return the new schedule for the specific element.
 	 */
 	public Schedule readCalendar(Element element) {
 		if(elements.size() == 0)
@@ -169,43 +181,18 @@ public class Schedule {
 	}
 
 	/**
-	 * @return the events in a specific month.
+	 * Schedules a series of periodic events for a given list of elements at a given time of day for a given duration.
+	 *
+	 * @param elementsList   a list of elements to schedule events for
+	 * @param timeOfDay      the time of day to schedule the events
+	 * @param duration       the duration of each event in minutes
+	 * @param periodicity    the number of events to schedule
+	 *
+	 * @return a list of reunions that were scheduled
+	 *
+	 * @throws FileNotFoundException if the elements list contains invalid elements
 	 */
-	public Schedule readCalendarForSpecificMonth(String  month) {
-		if(elements.size() == 0 && events.size() == 0) {
-			System.out.println("Elements are empty!");
-		}
-		List<Event> filteredList = events.stream().filter(event -> event.getStartDate().getMonth().toString().equalsIgnoreCase(month)).collect(Collectors.toList());
-		List<Event> newList = new ArrayList<>();
-		for(Event e : filteredList) {
-			newList.add(e);
-		}
-		Schedule newSchedule = new Schedule(newList, elements);
-		return newSchedule;
-	}
-
-
-	/**
-	 * Following the input of a specific month, it searches for the events in a specific day
-	 * @return the events in a specific day of a month.
-	 */
-	public Schedule readCalendarForSpecificDayOfTheMonth(int day, String month) {
-		Schedule schedule = readCalendarForSpecificMonth(month);
-		List<Event> monthList = schedule.events;
-		List<Event> newList = new ArrayList<>();
-		for(Event e : monthList) {
-			if(e.getEndDate().getDayOfMonth() == day) {
-				newList.add(e);
-			} 
-		}
-		if(newList.size() == 0) 
-			System.out.println("There are no events for the selected day!");
-
-		Schedule newSchedule = new Schedule(newList, elements);
-		return newSchedule;
-	}
-
-	public List<Event> periodicReunion(List<Element> elementsList, TimeOfDay timeOfDay, int duration, int periodicity) {
+	public List<Event> periodicReunion(List<Element> elementsList, TimeOfDay timeOfDay, int duration, int periodicity) throws FileNotFoundException {
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
 				System.out.println("Invalid element in list");
@@ -217,17 +204,18 @@ public class Schedule {
 
 		LocalDateTime time = LocalDateTime.now().withSecond(0).withNano(0);
 		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
+		
+		if(now.getHour() > timeOfDay.getEndHour()) {
+			
+			time = time.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+		}
+		
+		if(now.getHour() < timeOfDay.getStartHour()) {
+			time = time.withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+		}
 
 		for(int i = 1; i <= periodicity; i++) {
 
-			if(now.getHour() > timeOfDay.getEndHour()) {
-
-				time = time.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
-			}
-
-			if(now.getHour() < timeOfDay.getStartHour()) {
-				time = time.withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
-			}
 
 			Event evento = new Event(time, time.plusMinutes(duration), "Reunião", elementsList);
 			
@@ -268,7 +256,6 @@ public class Schedule {
 						evento.setEndDate(time.plusMinutes(duration));
 
 						List<Event> head = eventsList.subList(0, 1);
-						//if(head.get(0).getStartDate().isBefore(evento.getStartDate())) {
 							
 						//}
 						if(head.size() == 0) {
@@ -292,10 +279,25 @@ public class Schedule {
 			int subtract = time.getDayOfWeek().getValue() - 1;
 			time = time.plusWeeks(1).minusDays(subtract).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 		}
+		
+		Collections.sort(events);
+		PrintStream out = new PrintStream("Horário.txt");
+		System.setOut(out);
+		for(Event e: this.events) {
+			System.out.println(e.toString());
+		}
 
 		return reunionList;	
 	}
-
+	
+	/**
+	 * Filters a list of events by a given time of day and a list of elements.
+	 *
+	 * @param timeOfDay   the time of day to filter events by
+	 * @param elementsList   the list of elements to filter events by
+	 *
+	 * @return a sorted list of events that match the given time of day and elements
+	 */
 	public List<Event> filteredEvents(TimeOfDay timeOfDay, List<Element> elementsList) {
 
 		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
@@ -331,14 +333,17 @@ public class Schedule {
 	}
 	
 	/**
-	 * Following the input of a list of elements that the costumer wants to have in the reunion, an info if he wants the reunion
-	 * at morning or afternoon and the duration for the reunion. First it checks if all of the elements in the input exist, then 
-	 * it's created a list of events for the specific elements for the reunion, using a filter. Then a list of events that occurs
-	 * in the morning or afternoon, it depends according with the input. At the end, it starts to search for available dates for the reunion,
-	 * starting the search for the closest possible time.
-	 * @return the created reunion.
+	 * Checks for an available date and time to schedule a reunion for a given list of elements that will participate in the reunion
+	 * and time of day for the reunion.
+	 *
+	 * @param elementsList   the list of elements to schedule the event for
+	 * @param timeOfDay      the time of day to schedule the event
+	 * @param duration       the duration of the event in minutes
+	 *
+	 * @return the scheduled event
+	 * @throws FileNotFoundException 
 	 */
-	public Event checkAvailableDate(List<Element> elementsList, TimeOfDay timeOfDay, int duration) {
+	public Event checkAvailableDate(List<Element> elementsList, TimeOfDay timeOfDay, int duration) throws FileNotFoundException {
 
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
@@ -385,8 +390,14 @@ public class Schedule {
 					time = head.get(0).getEndDate();
 
 				}
-				//avançar o dia
+				//advances the day
 				time = now.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+			}
+			Collections.sort(events);
+			PrintStream out = new PrintStream("Horário.txt");
+			System.setOut(out);
+			for(Event e: this.events) {
+				System.out.println(e.toString());
 			}
 
 		return evento;
@@ -396,7 +407,6 @@ public class Schedule {
 	/**
 	 * @return the elements list.
 	 */
-
 	public List<Element> getElements() {
 		return elements;
 	}
