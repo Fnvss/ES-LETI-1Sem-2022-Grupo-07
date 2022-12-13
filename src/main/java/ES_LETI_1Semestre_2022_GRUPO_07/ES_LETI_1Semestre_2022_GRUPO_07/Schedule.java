@@ -6,26 +6,20 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-
-import java.io.FileReader;
-import net.fortuna.ical4j.data.UnfoldingReader;
 
 public class Schedule {
 
@@ -94,16 +88,17 @@ public class Schedule {
 			elements.add(element);
 		}
 		Collections.sort(events);
-		PrintStream out = new PrintStream("Horário.txt");
-        System.setOut(out);
+		for(Event e : this.events) {
+			System.out.println(e.toString());
+		}
 	}
-	
-//	public void ScheduleTxt(Element element) throws IOException, ParserException, ParseException {
-//		addElementToSchedule(element);
-//		PrintStream out = new PrintStream("Horário.txt");
-//		System.setOut(out);
-//	}
-	
+
+	//	public void ScheduleTxt(Element element) throws IOException, ParserException, ParseException {
+	//		addElementToSchedule(element);
+	//		PrintStream out = new PrintStream("Horário.txt");
+	//		System.setOut(out);
+	//	}
+
 	public String filterString(String s) {
 		String[] aux = s.split(" -");
 		String summary = aux[0];
@@ -112,7 +107,7 @@ public class Schedule {
 			s = s + summary.valueOf("Exame")+": ";
 			summary = summary.replaceAll("Exame: ", "");
 		}
-		
+
 		if(summary.contains("Teste")) {
 			s = s + summary.valueOf("Teste") +": ";
 			summary = summary.replaceAll("Teste: ", "");
@@ -121,13 +116,13 @@ public class Schedule {
 			s = s + summary.valueOf("Avaliação Contínua")+": ";
 			summary = summary.replaceAll("Avaliação Contínua: ", "");
 		}
-		
+
 		s = getUpperChars(summary, s);
 		return s;
 	}
-	
+
 	public String getUpperChars(String s, String string) {
-		
+
 		for(int i = 0; i< s.length(); i++) {
 			char c = s.charAt(i);
 			if(Character.isUpperCase(c) ) {
@@ -210,7 +205,131 @@ public class Schedule {
 		return newSchedule;
 	}
 
+	public List<Event> periodicReunion(List<Element> elementsList, TimeOfDay timeOfDay, int duration, int periodicity) {
+		for(Element e: elementsList) {
+			if(!elements.contains(e)) {
+				System.out.println("Invalid element in list");
+				break;
+			}	
+		}
 
+		List<Event> reunionList = new ArrayList<>();
+
+		LocalDateTime time = LocalDateTime.now().withSecond(0).withNano(0);
+		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
+
+		for(int i = 1; i <= periodicity; i++) {
+
+			if(now.getHour() > timeOfDay.getEndHour()) {
+
+				time = time.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+			}
+
+			if(now.getHour() < timeOfDay.getStartHour()) {
+				time = time.withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+			}
+
+			Event evento = new Event(time, time.plusMinutes(duration), "Reunião", elementsList);
+			
+			List<Event> eventsList = null;
+
+			switch(timeOfDay) {
+			case MANHA:
+				eventsList = this.events.stream()
+				.filter(event -> 
+				!Collections.disjoint(event.getElements(), elementsList) &&
+				(event.getStartDate().isAfter(evento.getStartDate()) || 
+				event.getStartDate().isEqual(evento.getStartDate())) &&
+				event.getStartDate().getHour() <= timeOfDay.getEndHour() &&
+				event.getStartDate().getMinute() <= timeOfDay.getEndMinute()
+						).collect(Collectors.toList());
+				
+				break;
+			case TARDE:
+				eventsList = this.events.stream()
+				.filter(event ->
+				!Collections.disjoint(event.getElements(), elementsList) &&
+				event.getStartDate().isAfter(now) &&
+				event.getStartDate().getHour() >= timeOfDay.getStartHour() &&
+				event.getStartDate().getMinute() >= timeOfDay.getStartMinute()
+						).collect(Collectors.toList());
+				
+				break;
+			default:
+				// code bloc
+			}
+			Collections.sort(eventsList);
+
+			outerloop:
+				while(true) {
+					while(time.getHour() <= timeOfDay.getEndHour() && time.plusMinutes(duration).getHour() <= timeOfDay.getEndHour()) {
+
+						evento.setStartDate(time);
+						evento.setEndDate(time.plusMinutes(duration));
+
+						List<Event> head = eventsList.subList(0, 1);
+						//if(head.get(0).getStartDate().isBefore(evento.getStartDate())) {
+							
+						//}
+						if(head.size() == 0) {
+							this.events.add(evento);
+							break outerloop;
+						}
+						if(!head.get(0).collidesWithEvent(evento)) {
+							this.events.add(evento);
+							break outerloop;
+						}
+
+						eventsList = eventsList.subList(1, eventsList.size()); // tail
+						time = head.get(0).getEndDate();
+
+					}
+					//avançar o dia
+					time = now.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+				}
+
+			reunionList.add(evento);
+			int subtract = time.getDayOfWeek().getValue() - 1;
+			time = time.plusWeeks(1).minusDays(subtract).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+		}
+
+		return reunionList;	
+	}
+
+	public List<Event> filteredEvents(TimeOfDay timeOfDay, List<Element> elementsList) {
+
+		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
+
+		List<Event> eventsList = null;
+
+		switch(timeOfDay) {
+		case MANHA:
+			eventsList = this.events.stream()
+			.filter(event -> 
+			!Collections.disjoint(event.getElements(), elementsList) &&
+			event.getStartDate().isAfter(now) &&
+			event.getStartDate().getHour() <= timeOfDay.getEndHour() &&
+			event.getStartDate().getMinute() <= timeOfDay.getEndMinute()
+					).collect(Collectors.toList());
+			
+			break;
+		case TARDE:
+			eventsList = this.events.stream()
+			.filter(event ->
+			!Collections.disjoint(event.getElements(), elementsList) &&
+			event.getStartDate().isAfter(now) &&
+			event.getStartDate().getHour() >= timeOfDay.getStartHour() &&
+			event.getStartDate().getMinute() >= timeOfDay.getStartMinute()
+					).collect(Collectors.toList());
+			
+			break;
+		default:
+			// code bloc
+		}
+		Collections.sort(eventsList);
+		return eventsList;
+	}
+	
 	/**
 	 * Following the input of a list of elements that the costumer wants to have in the reunion, an info if he wants the reunion
 	 * at morning or afternoon and the duration for the reunion. First it checks if all of the elements in the input exist, then 
@@ -219,91 +338,60 @@ public class Schedule {
 	 * starting the search for the closest possible time.
 	 * @return the created reunion.
 	 */
-	//manha ou tarde, analisando os elementos em questao ver o horario de disponibilidade dos mesmos para marcar uma reuniao e ver qual
-	// a mnelhor hora par a fazer a reuniao com todos os elementos
+	public Event checkAvailableDate(List<Element> elementsList, TimeOfDay timeOfDay, int duration) {
 
-	public Event checkAvailableDate(List<Element> elementsList, String timeOfTheDay, int duration) {
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
 				System.out.println("Invalid element in list");
 				break;
 			}	
 		}
-		
+
 		LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
-		LocalDateTime time = LocalDateTime.now().withSecond(0).withNano(0);
-		List<Event> eventsForSpecificElements = events.stream().filter(event -> 
-		!Collections.disjoint(event.getElements(), elementsList)
-				).collect(Collectors.toList());		
+		LocalDateTime time = LocalDateTime.now().withSecond(0).withNano(0);	
 		List<Event> eventsList = null;
-		int endHour = 0;
-		int startHour = 0;
-		int startMinute = 0;
 
-		
-		if(timeOfTheDay.equalsIgnoreCase("Manhã")) {
-			eventsList = eventsForSpecificElements.stream()
-					.filter(event -> 
-					event.getStartDate().isAfter(now) &&
-					event.getStartDate().getHour() <= fimManhaHora &&
-					event.getStartDate().getMinute() <= fimManhaMinuto
-							).collect(Collectors.toList());
-			startHour = inicioManhaHora;
-			startMinute = inicioManhaMinuto;
-			endHour = fimManhaHora;
+		eventsList = filteredEvents(timeOfDay, elementsList);
 
-		} else if(timeOfTheDay.equalsIgnoreCase("Tarde")) {
-			eventsList = eventsForSpecificElements.stream()
-					.filter(event ->
-					event.getStartDate().isAfter(now) &&
-					event.getStartDate().getHour() >= inicioTardeHora &&
-					event.getStartDate().getMinute() >= inicioTardeMinuto
-							).collect(Collectors.toList());
-			startHour = inicioTardeHora;
-			startMinute = inicioTardeMinuto;
-			endHour = fimTardeHora;
+		if(now.getHour() > timeOfDay.getEndHour()) {
+
+			time = time.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 		}
-		Collections.sort(eventsList);
 
-		//a hora aqui esta a ir para as 13:00 do dia now
-		if(now.getHour() > endHour) {
-			
-			time = time.plusDays(1).withHour(startHour).withMinute(startMinute);
-		}
-		
-		if(now.getHour() < startHour) {
-			time = time.withHour(startHour).withMinute(startMinute);
+		if(now.getHour() < timeOfDay.getStartHour()) {
+			time = time.withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 		}
 
 		Event evento = new Event(time, time.plusMinutes(duration), "Reunião", elementsList);
 
 		outerloop:
-		while(true) {
-			while(time.getHour() <= endHour && time.plusMinutes(duration).getHour() <= endHour) {
-				
-				evento.setStartDate(time);
-				evento.setEndDate(time.plusMinutes(duration));
-				
-				List<Event> head = eventsList.subList(0, 1);
-				if(head.size() == 0) {
-					this.events.add(evento);
-					break outerloop;
+			while(true) {
+				while(time.getHour() <= timeOfDay.getEndHour() && time.plusMinutes(duration).getHour() <= timeOfDay.getEndHour()) {
+
+					evento.setStartDate(time);
+					evento.setEndDate(time.plusMinutes(duration));
+
+					List<Event> head = eventsList.subList(0, 1);
+					if(head.size() == 0) {
+						this.events.add(evento);
+						break outerloop;
+					}
+					if(!head.get(0).collidesWithEvent(evento)) {
+						this.events.add(evento);
+						break outerloop;
+					}
+
+					eventsList = eventsList.subList(1, eventsList.size()); // tail
+					time = head.get(0).getEndDate();
+
 				}
-				if(!head.get(0).collidesWithEvent(evento)) {
-					this.events.add(evento);
-					break outerloop;
-				}
-				
-				eventsList = eventsList.subList(1, eventsList.size()); // tail
-				time = head.get(0).getEndDate();
-				
+				//avançar o dia
+				time = now.plusDays(1).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 			}
-			//avançar o dia
-			time = now.plusDays(1).withHour(startHour).withMinute(startMinute);
-		}
 
 		return evento;
 	}
+
 
 	/**
 	 * @return the elements list.
