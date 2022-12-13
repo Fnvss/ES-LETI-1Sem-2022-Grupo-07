@@ -10,13 +10,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MonthlyCalendar{
 
@@ -83,50 +82,6 @@ public class MonthlyCalendar{
 			}
 		});
 
-		// Create a MouseListener to handle the mouse click event on the calendar table
-		MouseListener mouseListener = new MouseListener() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 1) {
-					// Get the row and column indices of the clicked cell
-					int row = tblCalendar.rowAtPoint(e.getPoint());
-					int col = tblCalendar.columnAtPoint(e.getPoint());
-
-					// Get the value of the clicked cell
-					int day = (Integer) tblCalendar.getValueAt(row, col);
-
-					actualDate = LocalDate.of(currentYear,currentMonth + 1,day);
-
-
-					// Check if the cell contains a day of the month
-					if (day != 0) {
-						try {
-							DayCalendar aux = new DayCalendar(CalendarViews.getListOfEvents(), actualDate);
-							CalendarViews.dailyView(aux);
-						} catch (IOException | ParserException | ParseException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						} 
-						frmMain.dispose();
-					}
-				}
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {}
-
-			@Override
-			public void mouseExited(MouseEvent e) {}
-		};
-
-		// Add the MouseListener to the calendar table
-		tblCalendar.addMouseListener(mouseListener);
 
 		//Add controls to pane
 		pane.add(pnlCalendar);
@@ -182,6 +137,51 @@ public class MonthlyCalendar{
 		mtblCalendar.setColumnCount(7);
 		mtblCalendar.setRowCount(6);
 
+		// Create a MouseListener to handle the mouse click event on the calendar table
+		MouseListener mouseListener = new MouseListener() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 1) {
+					// Get the row and column indices of the clicked cell
+					int row = tblCalendar.rowAtPoint(e.getPoint());
+					int col = tblCalendar.columnAtPoint(e.getPoint());
+
+					// Get the value of the clicked cell
+					int day = (Integer) tblCalendar.getValueAt(row, col);
+
+					actualDate = LocalDate.of(currentYear,currentMonth + 1,day);
+
+
+					// Check if the cell contains a day of the month
+					if (day != 0) {
+						try {
+							DayCalendar aux = new DayCalendar(CalendarViews.getListOfEvents(), actualDate);
+							CalendarViews.dailyView(aux);
+						} catch (IOException | ParserException | ParseException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} 
+						frmMain.dispose();
+					}
+				}
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+		};
+
+		// Add the MouseListener to the calendar table
+		tblCalendar.addMouseListener(mouseListener);
+
 		//Populate table
 		for (int i=realYear-100; i<=realYear+100; i++){
 			cmbYear.addItem(String.valueOf(i));
@@ -228,7 +228,6 @@ public class MonthlyCalendar{
 		tblCalendar.setDefaultRenderer(tblCalendar.getColumnClass(0), new tblCalendarRenderer());
 	}
 
-
 	static class tblCalendarRenderer extends DefaultTableCellRenderer{
 		public Component getTableCellRendererComponent (JTable table, Object value, boolean selected, boolean focused, int row, int column){
 			Schedule schedule = Login.schedule;
@@ -244,39 +243,50 @@ public class MonthlyCalendar{
 
 
 			if (value != null){
-				// Convert the cell value to a LocalDate object
-				int day = Integer.parseInt(value.toString());
-				// Convert the cell value to a LocalDate object
-				LocalDate date = LocalDate.of(currentYear, currentMonth+1, day);
+				for(Event e : list) {
+					if (Integer.parseInt(value.toString()) == e.getStartDate().getDayOfMonth() 
+							&& currentMonth == e.getStartDate().getMonthValue() 
+							&& currentYear == e.getStartDate().getYear()){
 
-				// Filter the list of events to only include events that happen on the same date as the cell date
-				List<Event> filteredList = list.stream()
-						.filter(event -> event.getStartDate().toLocalDate().equals(date))
-						.collect(Collectors.toList());
 
-				if(filteredList.size() == 0) {
-				} else if(filteredList.size() <= 1) {
-					setBackground(new Color(153,255,51));//GREEN
-				} else if(filteredList.size() <= 2) {
-					setBackground(new Color(255,255,102));//YELLOW
-				} else if(filteredList.size() <= 3) {
-					setBackground(Color.ORANGE);//Orange
-				} else if(filteredList.size() >= 4) {
-					setBackground(new Color(204,0,0));//Red
+						double totalWorkDayMinutes = (double) 12*schedule.getElements().size();
+						double totalWorkHoursByElement = list.stream()
+								.filter(event -> event.getStartDate().getDayOfMonth() == Integer.parseInt(value.toString())
+								&& e.getStartDate().getMonthValue() == currentMonth
+								&& e.getStartDate().getYear() == currentYear)
+								.mapToDouble(event -> event.getElements().size())
+								.sum();
+
+						double i = totalWorkHoursByElement / totalWorkDayMinutes;
+
+						if (i <= 0.25) {
+							setBackground(Color.GREEN);//GREEN
+						} else if(i <= 0.5) {
+							setBackground(Color.YELLOW);//YELLOW
+						} else if(i <= 0.75) {
+							setBackground(Color.ORANGE);//Orange
+						} else if(i > 0.75) {
+							setBackground(Color.RED);//Red
+						}
+					}
 				}
-
 
 				if (Integer.parseInt(value.toString()) == realDay && currentMonth == realMonth && currentYear == realYear){ //Today
 					setBackground(new Color(220, 220, 255));
 
 				}
 			}
+
+			//			if (value != null){
+			//				if (Integer.parseInt(value.toString()) == realDay && currentMonth == realMonth && currentYear == realYear){ //Today
+			//					setBackground(new Color(220, 220, 255));
+			//				}
+			//			}
 			setBorder(null);
 			setForeground(Color.black);
 			return this;
 		}
 	}
-
 
 	static class btnPrev_Action implements ActionListener{
 		public void actionPerformed (ActionEvent e){
@@ -340,4 +350,9 @@ public class MonthlyCalendar{
 		}
 	}
 
+	static class clickDay_Action implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+
+		}
+	}
 }
