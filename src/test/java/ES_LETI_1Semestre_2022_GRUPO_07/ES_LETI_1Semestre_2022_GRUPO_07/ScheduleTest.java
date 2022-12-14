@@ -56,13 +56,9 @@ class ScheduleTest {
 	@Test
 	void testPeriodicReunion() throws FileNotFoundException {
 		List<Event> eventsTest = new ArrayList<>();
-		Event eventTeste = new Event(LocalDateTime.of(2022, 12, 14, 8, 0), LocalDateTime.of(2022, 12, 14, 8, 30), "Reunião", elements);
-		Event eventTeste2 = new Event(LocalDateTime.of(2022, 12, 19, 8, 0), LocalDateTime.of(2022, 12, 19, 8, 30), "Reunião", elements);
-		Event eventTeste3 = new Event(LocalDateTime.of(2022, 12, 26, 8, 0), LocalDateTime.of(2022, 12, 26, 8, 30), "Reunião", elements);
+		Event eventTeste = new Event(LocalDateTime.of(2022, 12, 15, 9, 30), LocalDateTime.of(2022, 12, 15, 10, 0), "Reunião", elements);
 		eventsTest.add(eventTeste);
-		eventsTest.add(eventTeste2);
-		eventsTest.add(eventTeste3);
-		assertEquals(eventsTest, schedule.periodicReunion(elements, TimeOfDay.MANHA, 30, 1, 3));
+		assertEquals(eventsTest, schedule.periodicReunion(elements, TimeOfDay.MANHA, 30, 1, 1));
 	}
 
 	@Test
