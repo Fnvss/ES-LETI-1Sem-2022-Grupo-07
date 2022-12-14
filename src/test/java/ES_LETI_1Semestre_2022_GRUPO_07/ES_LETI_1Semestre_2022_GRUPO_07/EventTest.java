@@ -19,11 +19,20 @@ class EventTest {
 	
 	Event event = new Event(LocalDateTime.of(2022, 12, 15, 8, 0), LocalDateTime.of(2022, 12, 15, 9, 30), "Arquitetura de Redes", elements);
 	Event event2 = new Event(LocalDateTime.of(2022, 12, 15, 8, 15), LocalDateTime.of(2022, 12, 15, 8, 45), "Arquitetura de Redes", elements);
+	Event event3 = new Event(LocalDateTime.of(2022, 12, 15, 8, 0), LocalDateTime.of(2022, 12, 15, 8, 30), "Arquitetura de Redes", elements);
+	Event event4 = new Event(LocalDateTime.of(2022, 12, 15, 8, 0), LocalDateTime.of(2022, 12, 15, 8, 30), "Arquitetura de Redes", elements);
+	Event event5 = new Event(LocalDateTime.of(2022, 12, 15, 8, 10), LocalDateTime.of(2022, 12, 15, 9, 0), "Arquitetura de Redes", elements);
+	Event event6 = new Event(LocalDateTime.of(2022, 12, 12, 8, 0), LocalDateTime.of(2022, 12, 12, 8, 30));
+	Event event7 = new Event(LocalDateTime.of(2022, 12, 12, 8, 0), LocalDateTime.of(2022, 12, 12, 8, 30), "Reunião");
+	
 	
 	@BeforeEach
 	void setUp() throws Exception {
 		elements.add(element1);
 		elements.add(element2);
+		event.addElement(element1);
+		event.setSummary("Reunião");
+		
 	}
 
 	@Test
@@ -38,7 +47,7 @@ class EventTest {
 
 	@Test
 	void testGetSummary() {
-		assertEquals("Arquitetura de Redes", event.getSummary());
+		assertEquals("Arquitetura de Redes", event2.getSummary());
 	}
 
 	@Test
@@ -49,6 +58,10 @@ class EventTest {
 	@Test
 	void testCollidesWithEvent() {
 		assertEquals(true, event.collidesWithEvent(event2));
+		assertEquals(true, event2.collidesWithEvent(event3));
+		assertEquals(true, event3.collidesWithEvent(event4));
+		assertEquals(true, event4.collidesWithEvent(event5));
+		assertEquals(true, event5.collidesWithEvent(event));
 	}
 
 }

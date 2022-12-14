@@ -51,5 +51,11 @@ class WeekCalendarTest {
 	void testGetEndDay() {
 		assertEquals(DayOfWeek.SUNDAY, weekCal.getEndDay());
 	}
+	
+	@Test
+	void TestnextWeek() {
+		weekCal.nextWeek();
+		assertEquals(DayOfWeek.MONDAY , weekCal.getStartDay());
+	}
 
 }

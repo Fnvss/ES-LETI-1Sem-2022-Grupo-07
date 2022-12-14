@@ -12,41 +12,49 @@ import org.junit.jupiter.api.Test;
 
 class CalendarEventTest {
 
-	CalendarEvent calendarEvent;
+	CalendarEvent aux;
 	Element element1 = new Element("Rafael", "https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=ramss3@iscte.pt&password=gGdsqZehHOOyFFAPMPSk8VeB63LPV0scP4qR36srE3dMgEB3b8GPIxCKorPUzQeySmm0XoAR7K0gw8pA5QrVrvx1VwfVrgjOFhMlC0mQkG6UxWuE4R2n12xxgV9hYfbX");
 	Element element2 =  new Element("Filipe", "https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=fnvss@iscte.pt&password=QXPQEvIYJf6oR7oX3P7Ua19IGGIJTUD2Zmd6q7aqOaxmefDktt4TD0rSiMefsxnRwD8C9w4FmwWsKqF8wIPpxrTVisf31hZMd8KUAUERCtDWOfeWnM64j7k1jV8jbVE6");
 	List<Element> elements = new ArrayList<>();
+	CalendarEvent aux2;
 	
 	@BeforeEach
 	void setUp() throws Exception {
 		elements.add(element1);
 		elements.add(element2);
-		calendarEvent = new CalendarEvent(LocalDateTime.of(2022, 12, 12, 8, 0), LocalDateTime.of(2022, 12, 12, 9, 0), "Reunião", elements, Color.RED);
+		aux = new CalendarEvent(LocalDateTime.of(2022, 12, 12, 8, 0), LocalDateTime.of(2022, 12, 12, 9, 0), "Reunião", elements, Color.RED);
+		aux = new CalendarEvent(LocalDateTime.of(2022, 12, 12, 8, 0), LocalDateTime.of(2022, 12, 12, 9, 0), "Reunião", elements, Color.RED);
+		aux.setStart(LocalDateTime.of(2022, 12, 12, 8, 0));
+		aux.setEnd(LocalDateTime.of(2022, 12, 12, 9, 0));
+		aux.setText("Reunião");
+		aux.setElements(elements);
+		aux.toString();
 	}
 
 	@Test
 	void testGetStart() {
-		assertEquals(LocalDateTime.of(2022, 12, 12, 8, 0),calendarEvent.getStart());
+		
+		assertEquals(LocalDateTime.of(2022, 12, 12, 8, 0),aux.getStart());
 	}
 
 	@Test
 	void testGetElements() {
-		assertEquals(elements ,calendarEvent.getElements());
+		assertEquals(elements ,aux.getElements());
 	}
 
 	@Test
 	void testGetEnd() {
-		assertEquals(LocalDateTime.of(2022, 12, 12, 9, 0),calendarEvent.getEnd());
+		assertEquals(LocalDateTime.of(2022, 12, 12, 9, 0),aux.getEnd());
 	}
 
 	@Test
 	void testGetText() {
-		assertEquals("Reunião", calendarEvent.getText());
+		assertEquals("Reunião", aux.getText());
 	}
 
 	@Test
 	void testGetColor() {
-		assertEquals(Color.RED, calendarEvent.getColor());
+		assertEquals(Color.RED, aux.getColor());
 	}
 
 }

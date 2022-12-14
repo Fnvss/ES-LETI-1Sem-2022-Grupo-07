@@ -18,6 +18,7 @@ class ElementTest {
 
 	@Test
 	void testGetName() {
+		element.setName("Rafael");
 		assertEquals("Rafael", element.getName());
 	}
 
@@ -30,7 +31,7 @@ class ElementTest {
 	@Test
 	void testGetUrl() throws MalformedURLException {
 		 String aux = "https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=ramss3@iscte.pt&password=gGdsqZehHOOyFFAPMPSk8VeB63LPV0scP4qR36srE3dMgEB3b8GPIxCKorPUzQeySmm0XoAR7K0gw8pA5QrVrvx1VwfVrgjOFhMlC0mQkG6UxWuE4R2n12xxgV9hYfbX";
-		 URL url = new URL(aux);
+		 URL url = element.getUrl(aux);
 		assertEquals(aux , element.getWebLink());
 		
 	}
