@@ -166,20 +166,6 @@ public class Schedule {
 		return newSchedule;
 	}
 
-
-	/**
-	 * Reads all available calendars from the events list.
-	 * First checks if the elements list isn't empty and create an object Schedule.
-	 * @return the created new object Schedule.
-	 */
-	public Schedule readAllCalendars() {
-		if(elements.size() == 0 && events.size() == 0) {
-			System.out.println("No elements or events available!");
-		}
-		Schedule newSchedule = new Schedule(events, elements);
-		return newSchedule;
-	}
-
 	/**
 	 * Schedules a series of periodic events for a given list of elements at a given time of day for a given duration.
 	 *
@@ -192,7 +178,7 @@ public class Schedule {
 	 *
 	 * @throws FileNotFoundException if the elements list contains invalid elements
 	 */
-	public List<Event> periodicReunion(List<Element> elementsList, TimeOfDay timeOfDay, int duration, int periodicity) throws FileNotFoundException {
+	public List<Event> periodicReunion(List<Element> elementsList, TimeOfDay timeOfDay, int duration, int periodicity, int numberOfReunions) throws FileNotFoundException {
 		for(Element e: elementsList) {
 			if(!elements.contains(e)) {
 				System.out.println("Invalid element in list");
@@ -214,7 +200,7 @@ public class Schedule {
 			time = time.withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 		}
 
-		for(int i = 1; i <= periodicity; i++) {
+		for(int i = 1; i <= numberOfReunions; i++) {
 
 
 			Event evento = new Event(time, time.plusMinutes(duration), "Reunião", elementsList);
@@ -237,7 +223,8 @@ public class Schedule {
 				eventsList = this.events.stream()
 				.filter(event ->
 				!Collections.disjoint(event.getElements(), elementsList) &&
-				event.getStartDate().isAfter(now) &&
+				(event.getStartDate().isAfter(evento.getStartDate()) || 
+				event.getStartDate().isEqual(evento.getStartDate()))&&
 				event.getStartDate().getHour() >= timeOfDay.getStartHour() &&
 				event.getStartDate().getMinute() >= timeOfDay.getStartMinute()
 						).collect(Collectors.toList());
@@ -277,7 +264,7 @@ public class Schedule {
 
 			reunionList.add(evento);
 			int subtract = time.getDayOfWeek().getValue() - 1;
-			time = time.plusWeeks(1).minusDays(subtract).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
+			time = time.plusWeeks(periodicity).minusDays(subtract).withHour(timeOfDay.getStartHour()).withMinute(timeOfDay.getStartMinute());
 		}
 		
 		Collections.sort(events);

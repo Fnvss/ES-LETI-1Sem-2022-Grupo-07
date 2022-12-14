@@ -49,8 +49,10 @@ public class ReunionWindow implements ActionListener {
 	int durationTime = 0;
 	JXTextField duration = new JXTextField();
 	JXTextField periodicity;
+	JXTextField numberOfReunions;
 	List<Element> elementsReunion = new ArrayList<>();
 	int periodicityTime = 0;
+	int number = 0;
 
 	/**
 	 * Constructs a new ReunionWindow with the specified schedule.
@@ -111,7 +113,7 @@ public class ReunionWindow implements ActionListener {
 		((JLabel)timeOfDayCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
 		// Set size and location of the ComboBox.
-		timeOfDayCombo.setBounds(95, 190, 100, 30);
+		timeOfDayCombo.setBounds(95, 210, 100, 30);
 
 		// Creates a List of elements to be selected for the reunion, with the possibility of multiple selections.
 		list = new JList(schedule.getElements().toArray());
@@ -126,11 +128,21 @@ public class ReunionWindow implements ActionListener {
 		list.setVisibleRowCount(4);
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+		numberOfReunions = new JXTextField();
+		PlainDocument filter2 = (PlainDocument) numberOfReunions.getDocument();
+		filter2.setDocumentFilter(new IntegerFilter());
+		numberOfReunions.setBounds(95, 165, 100, 30);
+
+		// Set text prompt in the reunion text box.
+		numberOfReunions.setPrompt("Limit");
+		numberOfReunions.setPromptForeground(Color.DARK_GRAY);
+		numberOfReunions.setHorizontalAlignment(SwingConstants.CENTER);
+
 		// Set duration text box size and location, allowing only integers in the text box
 		periodicity  = new JXTextField();
-		PlainDocument filter2 = (PlainDocument) periodicity.getDocument();
-		filter2.setDocumentFilter(new IntegerFilter());
-		periodicity.setBounds(265, 190, 100, 30);
+		PlainDocument filter3 = (PlainDocument) periodicity.getDocument();
+		filter3.setDocumentFilter(new IntegerFilter());
+		periodicity.setBounds(265, 210, 100, 30);
 
 		// Set text prompt in the reunion text box.
 		periodicity.setPrompt("Periodicity");
@@ -153,6 +165,7 @@ public class ReunionWindow implements ActionListener {
 		contentPane.add(list);
 		contentPane.add(dateLabel);
 		contentPane.add(periodicity);
+		contentPane.add(numberOfReunions);
 
 		// Create frame
 		frame.setContentPane(contentPane);
@@ -243,9 +256,10 @@ public class ReunionWindow implements ActionListener {
 			 */			
 			if(ae.getActionCommand() == submitPeriodicButton.getActionCommand()) {
 				periodicityTime = Integer.parseInt(periodicity.getText());
+				number = Integer.parseInt(numberOfReunions.getText());
 				if(!elementsReunion.isEmpty()) {
 					try {
-						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime);
+						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime, number);
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
