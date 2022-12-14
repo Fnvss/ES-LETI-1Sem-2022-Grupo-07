@@ -1,4 +1,5 @@
 package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.*;
@@ -8,17 +9,24 @@ import net.fortuna.ical4j.data.ParserException;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * This class represents a monthly calendar that can be viewed by the user.
+ * The calendar provides controls for navigating between months and years, and
+ * also allows the user to switch between different views of the calendar, such
+ * as a daily or weekly view.
+ */
 public class MonthlyCalendar{
-
 	static JLabel lblMonth;
 	static JButton btnPrev, btnNext, backBtn;
 	static JTable tblCalendar;
@@ -32,8 +40,14 @@ public class MonthlyCalendar{
 	static LocalDate actualDate;
 
 
-
-
+	/**
+	 * This is the main entry point for the MonthlyCalendar program. It creates the
+	 * necessary Swing components and registers action listeners for the various
+	 * controls in the program, such as the "<" and ">" buttons for navigating between
+	 * months and the combo box for selecting the year and view.
+	 *
+	 * @param args an array of command-line arguments passed to the program
+	 */
 	public static void main (String args[]){
 		//Look and feel
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}
@@ -60,6 +74,7 @@ public class MonthlyCalendar{
 		cmbYear = new JComboBox();
 		btnPrev = new JButton ("<");
 		btnNext = new JButton (">");
+		backBtn = new JButton("Back");
 		mtblCalendar = new DefaultTableModel(){public boolean isCellEditable(int rowIndex, int mColIndex){return false;}};
 		tblCalendar = new JTable(mtblCalendar);
 		stblCalendar = new JScrollPane(tblCalendar);
@@ -71,8 +86,6 @@ public class MonthlyCalendar{
 		btnNext.addActionListener(new btnNext_Action());
 		cmbYear.addActionListener(new cmbYear_Action());
 		cmbView.addActionListener(new cmbView_Action());
-
-		backBtn = new JButton("Back");
 		backBtn.addActionListener(e -> {
 			switch (cmbView.getSelectedItem().toString()) {
 			case "Monthly":
@@ -81,61 +94,6 @@ public class MonthlyCalendar{
 				break;
 			}
 		});
-
-
-		//Add controls to pane
-		pane.add(pnlCalendar);
-		pnlCalendar.add(cmbView);
-		pnlCalendar.add(lblMonth);
-		pnlCalendar.add(cmbYear);
-		pnlCalendar.add(btnPrev);
-		pnlCalendar.add(btnNext);
-		pnlCalendar.add(backBtn);
-		pnlCalendar.add(stblCalendar);
-
-		//Set bounds
-		pnlCalendar.setBounds(0, 0, 1600, 1000);
-		lblMonth.setBounds(800-lblMonth.getPreferredSize().width/2, 9, 100, 25);
-		cmbYear.setBounds(1490, 920, 80, 25);
-		cmbView.setBounds(570, 7, 80, 25);
-		btnPrev.setBounds(670, 7, 50, 25);
-		btnNext.setBounds(880, 7, 50, 25);
-		backBtn.setBounds(950, 7, 70, 25);
-		stblCalendar.setBounds(0, 40, 1600, 1000);
-
-		//Make frame visible
-		frmMain.setVisible(true);
-		frmMain.setResizable(false);
-
-		//Get real month/year
-		GregorianCalendar cal = new GregorianCalendar(); //Create calendar
-		realDay = cal.get(GregorianCalendar.DAY_OF_MONTH); //Get day
-		realMonth = cal.get(GregorianCalendar.MONTH); //Get month
-		realYear = cal.get(GregorianCalendar.YEAR); //Get year
-		currentMonth = realMonth; //Match month and year
-		currentYear = realYear;
-
-		//Add headers
-		String[] headers = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; //All headers
-		for (int i=0; i<7; i++){
-			mtblCalendar.addColumn(headers[i]);
-		}
-
-		tblCalendar.getParent().setBackground(tblCalendar.getBackground()); //Set background
-
-		//No resize/reorder
-		// tblCalendar.getTableHeader().setResizingAllowed(false);
-		tblCalendar.getTableHeader().setReorderingAllowed(false);
-
-		//Single cell selection
-		tblCalendar.setColumnSelectionAllowed(true);
-		tblCalendar.setRowSelectionAllowed(true);
-		tblCalendar.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-		//Set row/column count
-		tblCalendar.setRowHeight(140);
-		mtblCalendar.setColumnCount(7);
-		mtblCalendar.setRowCount(6);
 
 		// Create a MouseListener to handle the mouse click event on the calendar table
 		MouseListener mouseListener = new MouseListener() {
@@ -182,6 +140,72 @@ public class MonthlyCalendar{
 		// Add the MouseListener to the calendar table
 		tblCalendar.addMouseListener(mouseListener);
 
+		//Add controls to pane
+		pane.add(pnlCalendar);
+		pnlCalendar.add(cmbView);
+		pnlCalendar.add(lblMonth);
+		pnlCalendar.add(cmbYear);
+		pnlCalendar.add(btnPrev);
+		pnlCalendar.add(btnNext);
+		pnlCalendar.add(backBtn);
+		pnlCalendar.add(stblCalendar);
+
+		//Set bounds
+		pnlCalendar.setBounds(0, 0, 1600, 1000);
+		lblMonth.setBounds(800-lblMonth.getPreferredSize().width/2, 9, 100, 25);
+		cmbYear.setBounds(1490, 920, 80, 25);
+		cmbView.setBounds(570, 7, 80, 25);
+		btnPrev.setBounds(670, 7, 50, 25);
+		btnNext.setBounds(880, 7, 50, 25);
+		backBtn.setBounds(950, 7, 70, 25);
+		stblCalendar.setBounds(0, 40, 1600, 1000);
+
+		// Load the icon image
+		Image iconImage = null;
+		try {
+			iconImage = ImageIO.read(new File("icon.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Set the icon image of the JFrame
+		frmMain.setIconImage(iconImage);
+
+		//Make frame visible
+		frmMain.setVisible(true);
+		frmMain.setResizable(false);
+
+		//Get real month/year
+		GregorianCalendar cal = new GregorianCalendar(); //Create calendar
+		realDay = cal.get(GregorianCalendar.DAY_OF_MONTH); //Get day
+		realMonth = cal.get(GregorianCalendar.MONTH); //Get month
+		realYear = cal.get(GregorianCalendar.YEAR); //Get year
+		currentMonth = realMonth; //Match month and year
+		currentYear = realYear;
+
+		//Add headers
+		String[] headers = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; //All headers
+		for (int i=0; i<7; i++){
+			mtblCalendar.addColumn(headers[i]);
+		}
+
+		tblCalendar.getParent().setBackground(tblCalendar.getBackground()); //Set background
+
+		//No resize/reorder
+		// tblCalendar.getTableHeader().setResizingAllowed(false);
+		tblCalendar.getTableHeader().setReorderingAllowed(false);
+
+		//Single cell selection
+		tblCalendar.setColumnSelectionAllowed(true);
+		tblCalendar.setRowSelectionAllowed(true);
+		tblCalendar.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		//Set row/column count
+		tblCalendar.setRowHeight(140);
+		mtblCalendar.setColumnCount(7);
+		mtblCalendar.setRowCount(6);
+
 		//Populate table
 		for (int i=realYear-100; i<=realYear+100; i++){
 			cmbYear.addItem(String.valueOf(i));
@@ -191,6 +215,16 @@ public class MonthlyCalendar{
 		refreshCalendar (realMonth, realYear); //Refresh calendar
 	}
 
+
+	/**
+	 * This method is used to refresh the calendar display with the current month, year,
+	 * and view selected by the user. It clears any existing data from the table, then
+	 * populates the table with the appropriate dates and events for the current month.
+	 *
+	 * @param year the year to display in the calendar
+	 * @param month the month to display in the calendar
+	 * @param view the view to use for the calendar (e.g. daily, weekly, monthly)
+	 */
 	public static void refreshCalendar(int month, int year){
 		//Variables
 		String[] months =  {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
@@ -228,67 +262,93 @@ public class MonthlyCalendar{
 		tblCalendar.setDefaultRenderer(tblCalendar.getColumnClass(0), new tblCalendarRenderer());
 	}
 
+
+	/**
+	 * This inner class is used to customize the rendering of the calendar table. It
+	 * extends the DefaultTableCellRenderer class and overrides the
+	 * getTableCellRendererComponent method to add custom formatting to the table cells.
+	 */
 	static class tblCalendarRenderer extends DefaultTableCellRenderer{
+
+		/**
+		 * This method is called whenever a cell in the calendar table needs to be
+		 * rendered. It applies custom formatting to the cell, such as setting the
+		 * background color and font, based on the value of the cell and the current
+		 * view of the calendar.
+		 *
+		 * @param table the JTable that contains the cell
+		 * @param value the value of the cell
+		 * @param isSelected whether the cell is currently selected
+		 * @param hasFocus whether the cell currently has focus
+		 * @param row the row index of the cell
+		 * @param column the column index of the cell
+		 * @return the rendered table cell
+		 */
 		public Component getTableCellRendererComponent (JTable table, Object value, boolean selected, boolean focused, int row, int column){
 			Schedule schedule = Login.schedule;
 			List<Event> list = schedule.getEvents();
 
 			super.getTableCellRendererComponent(table, value, selected, focused, row, column);
 			if (column == 0 || column == 6){ //Week-end
-				setBackground(new Color(211, 211, 211, 128));
+				setBackground(new Color(211, 211, 211, 128));//Light gray
 			}
 			else{ //Week
-				setBackground(new Color(255, 255, 255));
+				setBackground(new Color(255, 255, 255));// White
 			}
 
 
 			if (value != null){
-				for(Event e : list) {
-					if (Integer.parseInt(value.toString()) == e.getStartDate().getDayOfMonth() 
-							&& currentMonth == e.getStartDate().getMonthValue() 
-							&& currentYear == e.getStartDate().getYear()){
+				// Convert the cell value to a LocalDate object
+				int day = Integer.parseInt(value.toString());
+				// Convert the cell value to a LocalDate object
+				LocalDate date = LocalDate.of(currentYear, currentMonth+1, day);
 
+				// Filter the list of events to only include events that happen on the same date as the cell date
+				List<Event> filteredList = list.stream()
+						.filter(event -> event.getStartDate().toLocalDate().equals(date))
+						.collect(Collectors.toList());
 
-						double totalWorkDayMinutes = (double) 12*schedule.getElements().size();
-						double totalWorkHoursByElement = list.stream()
-								.filter(event -> event.getStartDate().getDayOfMonth() == Integer.parseInt(value.toString())
-								&& e.getStartDate().getMonthValue() == currentMonth
-								&& e.getStartDate().getYear() == currentYear)
-								.mapToDouble(event -> event.getElements().size())
-								.sum();
-
-						double i = totalWorkHoursByElement / totalWorkDayMinutes;
-
-						if (i <= 0.25) {
-							setBackground(Color.GREEN);//GREEN
-						} else if(i <= 0.5) {
-							setBackground(Color.YELLOW);//YELLOW
-						} else if(i <= 0.75) {
-							setBackground(Color.ORANGE);//Orange
-						} else if(i > 0.75) {
-							setBackground(Color.RED);//Red
-						}
-					}
+				//filteredList.size() gives the number of events on a day
+				if(filteredList.size() == 0) {//White
+				} else if(filteredList.size() <= 1) {
+					setBackground(new Color(153,255,51));//Green
+				} else if(filteredList.size() <= 2) {
+					setBackground(new Color(255,255,102));//Yellow
+				} else if(filteredList.size() <= 3) {
+					setBackground(Color.ORANGE);//Orange
+				} else if(filteredList.size() >= 4) {
+					setBackground(new Color(204,0,0));//Red
 				}
 
+				//Paint the current day as light blue
 				if (Integer.parseInt(value.toString()) == realDay && currentMonth == realMonth && currentYear == realYear){ //Today
 					setBackground(new Color(220, 220, 255));
-
 				}
 			}
-
-			//			if (value != null){
-			//				if (Integer.parseInt(value.toString()) == realDay && currentMonth == realMonth && currentYear == realYear){ //Today
-			//					setBackground(new Color(220, 220, 255));
-			//				}
-			//			}
 			setBorder(null);
 			setForeground(Color.black);
 			return this;
 		}
 	}
 
+
+	/**
+	 * This inner class is used to handle the user's interaction with the "<" button
+	 * in the calendar program. It implements the ActionListener interface and defines
+	 * a single method, actionPerformed, which is called whenever the user clicks on
+	 * the button.
+	 */
 	static class btnPrev_Action implements ActionListener{
+
+
+		/**
+		 * This method is called whenever the user clicks on the "<" button. It updates
+		 * the current month and year based on the value of the current month, then
+		 * calls the refreshCalendar method to update the calendar display with the
+		 * new values.
+		 *
+		 * @param e the ActionEvent object containing information about the button click
+		 */
 		public void actionPerformed (ActionEvent e){
 			if (currentMonth == 0){ //Back one year
 				currentMonth = 11;
@@ -301,7 +361,24 @@ public class MonthlyCalendar{
 		}
 	}
 
+
+	/**
+	 * This inner class is used to handle the user's interaction with the ">" button
+	 * in the calendar program. It implements the ActionListener interface and defines
+	 * a single method, actionPerformed, which is called whenever the user clicks on
+	 * the button.
+	 */
 	static class btnNext_Action implements ActionListener{
+
+
+		/**
+		 * This method is called whenever the user clicks on the ">" button. It updates
+		 * the current month and year based on the value of the current month, then
+		 * calls the refreshCalendar method to update the calendar display with the
+		 * new values.
+		 *
+		 * @param e the ActionEvent object containing information about the button click
+		 */
 		public void actionPerformed (ActionEvent e){
 			if (currentMonth == 11){ //Foward one year
 				currentMonth = 0;
@@ -314,7 +391,24 @@ public class MonthlyCalendar{
 		}
 	}
 
+
+	/**
+	 * This inner class is used to handle the user's interaction with the cmbYear ComboBox
+	 * in the calendar program. It implements the ActionListener interface and defines
+	 * a single method, actionPerformed, which is called whenever the user clicks on
+	 * the button.
+	 */
 	static class cmbYear_Action implements ActionListener{
+
+
+		/**
+		 * This method is called whenever the user clicks on the cmbYear ComboBox and selects a year. 
+		 * It updates the current month and year based on year selected on the cmbYear, then
+		 * calls the refreshCalendar method to update the calendar display with the
+		 * new values.
+		 *
+		 * @param e the ActionEvent object containing information about the button click
+		 */
 		public void actionPerformed (ActionEvent e){
 			if (cmbYear.getSelectedItem() != null){
 				String b = cmbYear.getSelectedItem().toString();
@@ -324,7 +418,25 @@ public class MonthlyCalendar{
 		}
 	}
 
+
+	/**
+	 * This inner class is used to handle the user's interaction with the cmbView ComboBox
+	 * in the calendar program. It implements the ActionListener interface and defines
+	 * a single method, actionPerformed, which is called whenever the user clicks on
+	 * the button.
+	 */
 	static class cmbView_Action implements ActionListener{
+
+
+		/**
+		 * This method is called whenever the user clicks on the cmbView ComboBox and selects a type of view. 
+		 * If the selected view is "Weekly" it will call the class CalendarViews and the method weeklyView(),
+		 * then disposes the current frame
+		 * If the selected view is "Daily" it will call the class CalendarViews and the method DailyView(),
+		 * then disposes the current frame
+		 * 
+		 * @param e the ActionEvent object containing information about the button click
+		 */
 		public void actionPerformed(ActionEvent e) {
 			if(cmbView.getSelectedItem().toString()=="Weekly") {
 				try {
@@ -347,12 +459,6 @@ public class MonthlyCalendar{
 				}			
 				frmMain.dispose();
 			}
-		}
-	}
-
-	static class clickDay_Action implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-
 		}
 	}
 }
