@@ -42,7 +42,7 @@ public class CalendarWindow implements ActionListener {
 	JComboBox<Element> membersCombo = new JComboBox<Element>();
 	JLabel label = new JLabel("Which Calendar you want to see");
 	JButton backButton = new JButton("Back");
-	JButton openFile = new JButton("Open Calendar in .txt");
+	JButton openFile = new JButton("Open Calendar txt");
 	JComboBox<Element> membersComboToTxt = new JComboBox<Element>();
 
 	public static CalendarWindow instance;
