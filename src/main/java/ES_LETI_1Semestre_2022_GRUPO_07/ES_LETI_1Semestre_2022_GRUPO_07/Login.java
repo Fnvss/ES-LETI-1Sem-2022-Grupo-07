@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 
 import javax.imageio.ImageIO;
@@ -145,7 +147,7 @@ public class Login implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent ae) {
 
-		/**
+		/*
 		 * it opens the calendar window when the calendar button its pressed.
 		 */
 		if(ae.getActionCommand() == calendarButton.getActionCommand()) {
@@ -157,7 +159,7 @@ public class Login implements ActionListener {
 			}
 		}
 
-		/**
+		/*
 		 * it creates an element, if it doesn't exist already, with the name and url received in the JTextFields.
 		 */
 		if(ae.getActionCommand() == addMemberButton.getActionCommand()) {
@@ -167,8 +169,14 @@ public class Login implements ActionListener {
 			}
 			String elementName = name.getText();
 			String elementUrl = url.getText();
+			URL aux;
+			try {
+				aux = new URL(elementUrl);
+			} catch (MalformedURLException e) {
+				JOptionPane.showMessageDialog(frame, "Error: Invalid URL.", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 
-			Element element = new Element(elementName, elementUrl);
 
 			for(Element e: schedule.getElements()) {
 				if(e.getWebLink().equals(elementUrl)) {
@@ -177,6 +185,8 @@ public class Login implements ActionListener {
 				}
 			}
 
+			Element element = new Element(elementName, elementUrl);
+			
 			if(schedule.getElements().indexOf(element) != -1) {
 				JOptionPane.showMessageDialog(null, "The inserted element Already Exists!");
 				return;
@@ -188,14 +198,15 @@ public class Login implements ActionListener {
 			} catch (IOException | ParserException | ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				JOptionPane.showMessageDialog(frame, "Error: Invalid URL.", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Error: Incorrect configuration for element.", "Error", JOptionPane.ERROR_MESSAGE);
+				
 			}
 
 			name.setText(null);
 			url.setText(null);
 		}
 
-		/**
+		/*
 		 * It opens the reunion window when the reunion button its pressed.
 		 */
 		if(ae.getActionCommand() == reunionButton.getActionCommand()) {
@@ -208,7 +219,7 @@ public class Login implements ActionListener {
 
 		}
 
-		/**
+		/*
 		 * It opens a list of all elements already inserted.
 		 */
 		if(ae.getActionCommand() == seeMembersList.getActionCommand()) {

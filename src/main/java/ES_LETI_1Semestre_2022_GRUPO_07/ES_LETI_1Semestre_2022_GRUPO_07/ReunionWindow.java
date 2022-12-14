@@ -44,13 +44,14 @@ public class ReunionWindow implements ActionListener {
 	JButton submitPeriodicButton = new JButton("Submit Periodic Reunion");
 	JList list;
 	JLabel dateLabel = new JLabel("Duration: ");
+	JLabel reunionsLabel = new JLabel("Nº Reunions:");
 	TimeOfDay timeOfDay;
 	String time;
-	int durationTime = 0;
 	JXTextField duration = new JXTextField();
 	JXTextField periodicity;
 	JXTextField numberOfReunions;
 	List<Element> elementsReunion = new ArrayList<>();
+	int durationTime = 0;
 	int periodicityTime = 0;
 	int number = 0;
 
@@ -104,7 +105,8 @@ public class ReunionWindow implements ActionListener {
 		// Set info for duration box size and location.
 		dateLabel.setBounds(40, 120, 300, 30);
 
-		/* Creates a ComboBox to select with the TimeOfDay enum,
+		/* 
+		 * Creates a ComboBox to select with the TimeOfDay enum,
 		 * for the user setect which time he wants to appoint the reunion.
 		 */
 		timeOfDayCombo.setModel(new DefaultComboBoxModel(TimeOfDay.values()));
@@ -113,7 +115,7 @@ public class ReunionWindow implements ActionListener {
 		((JLabel)timeOfDayCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
 		// Set size and location of the ComboBox.
-		timeOfDayCombo.setBounds(95, 210, 100, 30);
+		timeOfDayCombo.setBounds(265, 210, 100, 30);
 
 		// Creates a List of elements to be selected for the reunion, with the possibility of multiple selections.
 		list = new JList(schedule.getElements().toArray());
@@ -128,6 +130,7 @@ public class ReunionWindow implements ActionListener {
 		list.setVisibleRowCount(4);
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+		// Set duration text box size and location, allowing only integers in the text box
 		numberOfReunions = new JXTextField();
 		PlainDocument filter2 = (PlainDocument) numberOfReunions.getDocument();
 		filter2.setDocumentFilter(new IntegerFilter());
@@ -137,12 +140,16 @@ public class ReunionWindow implements ActionListener {
 		numberOfReunions.setPrompt("Limit");
 		numberOfReunions.setPromptForeground(Color.DARK_GRAY);
 		numberOfReunions.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		// Set info for duration box size and location.
+		reunionsLabel.setBounds(20, 165, 100, 30);
 
 		// Set duration text box size and location, allowing only integers in the text box
 		periodicity  = new JXTextField();
 		PlainDocument filter3 = (PlainDocument) periodicity.getDocument();
 		filter3.setDocumentFilter(new IntegerFilter());
-		periodicity.setBounds(265, 210, 100, 30);
+		periodicity.setBounds(95, 210, 100, 30);
+		
 
 		// Set text prompt in the reunion text box.
 		periodicity.setPrompt("Periodicity");
@@ -157,15 +164,16 @@ public class ReunionWindow implements ActionListener {
 
 		// Put objects into the panel
 		contentPane.add(label);
-		contentPane.add(timeOfDayCombo);
 		contentPane.add(backButton);
 		contentPane.add(duration);
+		contentPane.add(dateLabel);
+		contentPane.add(timeOfDayCombo);
+		contentPane.add(list);
+		contentPane.add(numberOfReunions);
+		contentPane.add(reunionsLabel);
+		contentPane.add(periodicity);
 		contentPane.add(submitButton);
 		contentPane.add(submitPeriodicButton);
-		contentPane.add(list);
-		contentPane.add(dateLabel);
-		contentPane.add(periodicity);
-		contentPane.add(numberOfReunions);
 
 		// Create frame
 		frame.setContentPane(contentPane);
@@ -224,7 +232,7 @@ public class ReunionWindow implements ActionListener {
 			Login.getInstance().getFrameInstance().setVisible(true);		
 		} else {
 
-			durationTime = Integer.parseInt(duration.getText());
+			
 			timeOfDay = (TimeOfDay) timeOfDayCombo.getSelectedItem();
 
 			List<Element> elementsReunion = new ArrayList<>();
@@ -238,15 +246,16 @@ public class ReunionWindow implements ActionListener {
 			 * with the inputs received on the reunion window.
 			 */
 			if(ae.getActionCommand() == submitButton.getActionCommand()) {
-				if(!elementsReunion.isEmpty()) {
+				if(!elementsReunion.isEmpty() && !(duration.getText().equals("")) && timeOfDay != null) {
 					try {
+						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.checkAvailableDate(elementsReunion, timeOfDay, durationTime);
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
-					JOptionPane.showMessageDialog(null," No elements inserted!");
+					JOptionPane.showMessageDialog(null,"Insert all inputs!");
 				}
 			}
 
@@ -255,17 +264,20 @@ public class ReunionWindow implements ActionListener {
 			 * with the inputs received on the reunion window.
 			 */			
 			if(ae.getActionCommand() == submitPeriodicButton.getActionCommand()) {
-				periodicityTime = Integer.parseInt(periodicity.getText());
-				number = Integer.parseInt(numberOfReunions.getText());
-				if(!elementsReunion.isEmpty()) {
+			
+				if (!numberOfReunions.getText().equals("") && !periodicity.getText().equals("") && !elementsReunion.isEmpty()
+					&& timeOfDay != null && !duration.getText().equals("")) {
 					try {
+						periodicityTime = Integer.parseInt(periodicity.getText());
+						number = Integer.parseInt(numberOfReunions.getText());
+						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime, number);
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
-					JOptionPane.showMessageDialog(null," No elements inserted!");
+					JOptionPane.showMessageDialog(null,"Insert all inputs!");
 				}
 
 			}
