@@ -18,7 +18,7 @@ class ScheduleTest {
 	Element element1 = new Element("Rafael", "https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=ramss3@iscte.pt&password=gGdsqZehHOOyFFAPMPSk8VeB63LPV0scP4qR36srE3dMgEB3b8GPIxCKorPUzQeySmm0XoAR7K0gw8pA5QrVrvx1VwfVrgjOFhMlC0mQkG6UxWuE4R2n12xxgV9hYfbX");
 	Element element2 =  new Element("Filipe", "https://fenix.iscte-iul.pt/publico/publicPersonICalendar.do?method=iCalendar&username=fnvss@iscte.pt&password=QXPQEvIYJf6oR7oX3P7Ua19IGGIJTUD2Zmd6q7aqOaxmefDktt4TD0rSiMefsxnRwD8C9w4FmwWsKqF8wIPpxrTVisf31hZMd8KUAUERCtDWOfeWnM64j7k1jV8jbVE6");
 	List<Element> elements = new ArrayList<>();
-	Event event1 = new Event(LocalDateTime.of(2023, 1, 4, 16, 30), LocalDateTime.of(2022, 1, 4, 19, 0), "Arquitetura de Redes", elements);;
+	Event event1 = new Event(LocalDateTime.of(2023, 1, 4, 16, 30), LocalDateTime.of(2023, 1, 4, 19, 0), "Arquitetura de Redes", elements);;
 	Event event2 = new Event(LocalDateTime.of(2022, 12, 15, 11, 0),LocalDateTime.of(2022, 12, 15, 12, 30), "Engenharia de Software", element1);
 	Event event3 = new Event(LocalDateTime.of(2022, 12, 15, 8, 0),LocalDateTime.of(2022, 12, 15, 9, 30), "Engenharia de Software", elements);
 	Event event4 = new Event(LocalDateTime.of(2022, 12, 14, 8, 0),LocalDateTime.of(2022, 12, 14, 8, 30), "Reunião", elements);
@@ -55,14 +55,14 @@ class ScheduleTest {
 
 	@Test
 	void testPeriodicReunion() throws FileNotFoundException {
-		List<Event> eventsList = new ArrayList<>();
+		List<Event> eventsTest = new ArrayList<>();
 		Event eventTeste = new Event(LocalDateTime.of(2022, 12, 14, 8, 0), LocalDateTime.of(2022, 12, 14, 8, 30), "Reunião", elements);
 		Event eventTeste2 = new Event(LocalDateTime.of(2022, 12, 19, 8, 0), LocalDateTime.of(2022, 12, 19, 8, 30), "Reunião", elements);
 		Event eventTeste3 = new Event(LocalDateTime.of(2022, 12, 26, 8, 0), LocalDateTime.of(2022, 12, 26, 8, 30), "Reunião", elements);
-		eventsList.add(eventTeste);
-		eventsList.add(eventTeste2);
-		eventsList.add(eventTeste3);
-		assertEquals(eventsList, schedule.periodicReunion(elements, TimeOfDay.MANHA, 30, 1, 3));
+		eventsTest.add(eventTeste);
+		eventsTest.add(eventTeste2);
+		eventsTest.add(eventTeste3);
+		assertEquals(eventsTest, schedule.periodicReunion(elements, TimeOfDay.MANHA, 30, 1, 3));
 	}
 
 	@Test
