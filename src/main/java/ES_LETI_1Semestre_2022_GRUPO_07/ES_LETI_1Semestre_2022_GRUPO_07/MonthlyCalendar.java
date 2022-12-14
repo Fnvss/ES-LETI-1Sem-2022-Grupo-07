@@ -47,8 +47,9 @@ public class MonthlyCalendar{
 	 * months and the combo box for selecting the year and view.
 	 *
 	 * @param args an array of command-line arguments passed to the program
+	 * @throws IOException 
 	 */
-	public static void main (String args[]){
+	public static void main (String args[]) throws IOException{
 		//Look and feel
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());}
 		catch (ClassNotFoundException e) {}
@@ -160,15 +161,7 @@ public class MonthlyCalendar{
 		backBtn.setBounds(950, 7, 70, 25);
 		stblCalendar.setBounds(0, 40, 1600, 1000);
 
-		// Load the icon image
-		Image iconImage = null;
-		try {
-			iconImage = ImageIO.read(new File("icon.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		Image iconImage = iconImage();
 		// Set the icon image of the JFrame
 		frmMain.setIconImage(iconImage);
 
@@ -216,6 +209,13 @@ public class MonthlyCalendar{
 	}
 
 
+	private static Image iconImage() throws IOException {
+		Image iconImage = null;
+		iconImage = ImageIO.read(new File("icon.png"));
+		return iconImage;
+	}
+
+
 	/**
 	 * This method is used to refresh the calendar display with the current month, year,
 	 * and view selected by the user. It clears any existing data from the table, then
@@ -226,8 +226,7 @@ public class MonthlyCalendar{
 	 * @param view the view to use for the calendar (e.g. daily, weekly, monthly)
 	 */
 	public static void refreshCalendar(int month, int year){
-		//Variables
-		String[] months =  {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+		lblMonth(month);
 		int nod, som; //Number Of Days, Start Of Month
 
 		//Allow/disallow buttons
@@ -235,8 +234,6 @@ public class MonthlyCalendar{
 		btnNext.setEnabled(true);
 		if (month == 0 && year <= realYear-10){btnPrev.setEnabled(false);} //Too early
 		if (month == 11 && year >= realYear+100){btnNext.setEnabled(false);} //Too late
-		lblMonth.setText(months[month]); //Refresh the month label (at the top)
-		lblMonth.setBounds(800-lblMonth.getPreferredSize().width/2, 10, 100, 25); //Re-align label with calendar
 		cmbYear.setSelectedItem(String.valueOf(year)); //Select the correct year in the combo box
 
 		//Clear table
@@ -260,6 +257,14 @@ public class MonthlyCalendar{
 
 		//Apply renderers
 		tblCalendar.setDefaultRenderer(tblCalendar.getColumnClass(0), new tblCalendarRenderer());
+	}
+
+
+	private static void lblMonth(int month) {
+		String[] months = { "January", "February", "March", "April", "May", "June", "July", "August", "September",
+				"October", "November", "December" };
+		lblMonth.setText(months[month]);
+		lblMonth.setBounds(800 - lblMonth.getPreferredSize().width / 2, 10, 100, 25);
 	}
 
 

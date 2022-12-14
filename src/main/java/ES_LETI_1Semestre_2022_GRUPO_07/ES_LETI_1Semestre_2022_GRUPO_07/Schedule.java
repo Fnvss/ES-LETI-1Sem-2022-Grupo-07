@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ConstraintViolationException;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 /**
@@ -67,13 +68,7 @@ public class Schedule {
 		Boolean bAux = false;
 
 		for(CalendarComponent comp : calendar.getComponents()) {
-			String aux = (String) comp.getRequiredProperty("DTSTART").getValue();
-			LocalDateTime startDate = LocalDateTime.parse(aux.replaceAll("Z$", ""), inputDateFormat);
-			String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
-			LocalDateTime endDate = LocalDateTime.parse(aux2.replaceAll("Z$", ""), inputDateFormat);
-			String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
-			String finalSummary = filterString(summary);				
-			Event newEvent = new Event(startDate,endDate,finalSummary,element);
+			Event newEvent = newEvent(element, comp);
 			int indexOfNewEvent = events.indexOf(newEvent);
 			if(indexOfNewEvent != -1) {
 				events.get(indexOfNewEvent).addElement(element);
@@ -91,6 +86,17 @@ public class Schedule {
 		for(Event e : this.events) {
 			System.out.println(e.toString());
 		}
+	}
+
+	private Event newEvent(Element element, CalendarComponent comp) throws ConstraintViolationException {
+		String aux = (String) comp.getRequiredProperty("DTSTART").getValue();
+		LocalDateTime startDate = LocalDateTime.parse(aux.replaceAll("Z$", ""), inputDateFormat);
+		String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
+		LocalDateTime endDate = LocalDateTime.parse(aux2.replaceAll("Z$", ""), inputDateFormat);
+		String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
+		String finalSummary = filterString(summary);
+		Event newEvent = new Event(startDate, endDate, finalSummary, element);
+		return newEvent;
 	}
 		
 	/**

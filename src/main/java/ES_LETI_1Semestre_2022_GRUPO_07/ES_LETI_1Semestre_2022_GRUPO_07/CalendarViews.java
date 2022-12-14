@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,7 +53,7 @@ public class CalendarViews {
 		
 		/*
 		 * Create the frame
-		 * Create the combo box
+S		 * Create the combo box
 		 */
 		weekFrm = new JFrame("Calendar");
 		String[] typeOfView = {"Weekly", "Daily", "Monthly"};
@@ -107,7 +108,12 @@ public class CalendarViews {
 				weekFrm.dispose();
 				break;
 			case "Monthly":
-				MonthlyCalendar.main(null);
+				try {
+					MonthlyCalendar.main(null);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				weekFrm.dispose();
 				break;
 			}
@@ -160,14 +166,7 @@ public class CalendarViews {
 	 * @throws ParseException If there is an error parsing the dates of the calendar events.
 	 */
 	public static void dailyView(DayCalendar aux) throws IOException, ParserException, ParseException {
-		/*
-		 * Create the frame
-		 * Create the combo box
-		 */
-		dayFrm = new JFrame("Calendar");
-		String[] typeOfView = {"Daily", "Weekly", "Monthly"};
-		cmbDay = new JComboBox(typeOfView);
-
+		JPanel dayControls = dayControls(aux);
 		//The DayCalendar object to display in the GUI.
 		aux.addCalendarEventClickListener(e -> System.out.println(e.getCalendarEvent()));
 		aux.addCalendarEmptyClickListener(e -> {
@@ -177,18 +176,27 @@ public class CalendarViews {
 
 
 		/*
-		 * Create the buttons for the calendar control
-		 * Set up the buttons
+		 * Add the panel to the frame.
+		 * Set up the frame.
+		 * Make the frame visible.
 		 */
+		dayFrm.add(dayControls, BorderLayout.NORTH);
+		dayFrm.add(aux, BorderLayout.CENTER);
+		dayFrm.setLocationRelativeTo(null);
+	}
+
+
+	private static JPanel dayControls(DayCalendar aux)
+			throws HeadlessException, IOException, ParserException, ParseException {
+		dayFrm = new JFrame("Calendar");
+		String[] typeOfView = { "Daily", "Weekly", "Monthly" };
+		cmbDay = new JComboBox(typeOfView);
 		JButton goToTodayBtn = new JButton("Today");
 		goToTodayBtn.addActionListener(e -> aux.goToToday());
 		JButton nextDayBtn = new JButton(">");
 		nextDayBtn.addActionListener(e -> aux.nextDay());
 		JButton prevDayBtn = new JButton("<");
 		prevDayBtn.addActionListener(e -> aux.prevDay());
-
-
-		//Back button with function to go back to the previous menu
 		JButton backBtn = new JButton("Back");
 		backBtn.addActionListener(e -> {
 			switch (cmbDay.getSelectedItem().toString()) {
@@ -198,8 +206,6 @@ public class CalendarViews {
 				break;
 			}
 		});
-
-		//Combo box functionality, changes views depending on the selectedItem
 		cmbDay.addActionListener(e -> {
 			switch (cmbDay.getSelectedItem().toString()) {
 			case "Weekly":
@@ -207,50 +213,40 @@ public class CalendarViews {
 					WeekCalendar weekCal = new WeekCalendar(getListOfEvents());
 					weeklyView(weekCal);
 				} catch (IOException | ParserException | ParseException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				dayFrm.dispose();
 				break;
 			case "Monthly":
-				MonthlyCalendar.main(null);
+				try {
+					MonthlyCalendar.main(null);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				dayFrm.dispose();
 				break;
 			}
 		});
-
-		// Load the icon image
-		Image iconImage = null;
-		try {
-			iconImage = ImageIO.read(new File("icon.png"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Set the icon image of the JFrame
+		Image iconImage = iconImage();
 		dayFrm.setIconImage(iconImage);
-
-
-		//Create the Panel to house the calendar controls
 		JPanel dayControls = new JPanel();
 		dayControls.add(cmbDay);
 		dayControls.add(prevDayBtn);
 		dayControls.add(goToTodayBtn);
 		dayControls.add(nextDayBtn);
 		dayControls.add(backBtn);
-
-
-		/*
-		 * Add the panel to the frame.
-		 * Set up the frame.
-		 * Make the frame visible.
-		 */
-		dayFrm.add(dayControls, BorderLayout.NORTH);
-		dayFrm.add(aux, BorderLayout.CENTER);
 		dayFrm.setSize(1600, 1000);
-		dayFrm.setLocationRelativeTo(null);
 		dayFrm.setVisible(true);
 		dayFrm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		return dayControls;
+	}
+
+
+	private static Image iconImage() throws IOException {
+		Image iconImage = null;
+		iconImage = ImageIO.read(new File("icon.png"));
+		return iconImage;
 	}
 
 	
