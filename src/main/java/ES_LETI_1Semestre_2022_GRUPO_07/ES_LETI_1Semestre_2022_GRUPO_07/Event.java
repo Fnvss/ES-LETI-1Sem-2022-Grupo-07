@@ -4,25 +4,58 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for representing a calendar event.
+ */
 public class Event implements Comparable<Event> {
 
+	/** The start date of the event. */
 	private LocalDateTime startDate;
+
+	/** The end date of the event. */
 	private LocalDateTime endDate;
+
+	/** The summary of the event. */
 	private String summary;
 
+	/** The list of elements associated with the event. */
 	List<Element> elements = new ArrayList<>();
 
+
+	/**
+	 * Constructs a new Event with the specified start and end dates.
+	 *
+	 * @param startDate The start date of the event.
+	 * @param endDate The end date of the event.
+	 */
 	public Event(LocalDateTime startDate, LocalDateTime endDate) {
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}
-	
+
+
+	/**
+	 * Constructs a new Event with the specified start and end dates, and summary.
+	 *
+	 * @param startDate The start date of the event.
+	 * @param endDate The end date of the event.
+	 * @param summary The summary of the event.
+	 */
 	public Event(LocalDateTime startDate, LocalDateTime endDate, String summary) {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.summary = summary;
 	}
 
+
+	/**
+	 * Constructs a new Event with the specified start and end dates, summary, and associated element.
+	 *
+	 * @param startDate The start date of the event.
+	 * @param endDate The end date of the event.
+	 * @param summary The summary of the event.
+	 * @param element The element associated with the event.
+	 */
 	public Event(LocalDateTime startDate, LocalDateTime endDate, String summary, Element element) {
 		this.startDate = startDate;
 		this.endDate = endDate;
@@ -30,25 +63,37 @@ public class Event implements Comparable<Event> {
 		elements.add(element);
 	}
 
+
+	/**
+	 * Constructs a new Event with the specified start and end dates, summary, and list of associated elements.
+	 *
+	 * @param startDate The start date of the event.
+	 * @param endDate The end date of the event.
+	 * @param summary The summary of the event.
+	 * @param elements The list of elements associated with the event.
+	 */
 	public Event(LocalDateTime startDate, LocalDateTime endDate, String summary, List<Element> elements) {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.summary = summary;
 		this.elements = elements;
-		//elements.add(element);
 	}
 
 
-
 	/**
-	 * @return the start date.
+	 * Gets the start date of this Event.
+	 *
+	 * @return The start date of this Event.
 	 */
 	public LocalDateTime getStartDate() {
 		return startDate;
 	}
-	
+
+
 	/**
-	 * @param Date the start date to set
+	 * Sets the start date of this Event.
+	 *
+	 * @param startDate The new start date for this Event.
 	 */
 	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
@@ -56,14 +101,19 @@ public class Event implements Comparable<Event> {
 
 
 	/**
-	 * @return the end date.
+	 * Gets the end date of this Event.
+	 *
+	 * @return The end date of this Event.
 	 */
 	public LocalDateTime getEndDate() {
 		return endDate;
 	}
-	
+
+
 	/**
-	 * @param Date the end date to set
+	 * Sets the end date of this Event.
+	 *
+	 * @param endDate The new end date for this Event.
 	 */
 	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
@@ -71,14 +121,19 @@ public class Event implements Comparable<Event> {
 
 
 	/**
-	 * @return the summary.
+	 * Gets the summary of this Event.
+	 *
+	 * @return The summary of this Event.
 	 */
 	public String getSummary() {
 		return summary;
 	}
 
+
 	/**
-	 * @param summary the summary to set
+	 * Sets the summary of this Event.
+	 *
+	 * @param summary The new summary for this Event.
 	 */
 	public void setSummary(String summary) {
 		this.summary = summary;
@@ -86,60 +141,68 @@ public class Event implements Comparable<Event> {
 
 
 	/**
-	 * @return the elements list.
+	 * Gets the list of elements associated with this Event.
+	 *
+	 * @return The list of elements associated with this Event.
 	 */
 	public List<Element> getElements() {
 		return elements;
 	}
-	
+
 
 	/**
-	 * adds an element to the list of elements.
+	 * Adds an element to the list of elements associated with this Event.
 	 */
 	public void addElement(Element element) {
 		if(elements.indexOf(element) == -1) {
 			this.elements.add(element);
 		}
 	}
+
 	
-	/*
-	 * it checks if an Event collides with another one.
-	 * Based in 5 possible ways to collide.
-	 * Both Event objects start with the same hour, one starts first and ends after the other,
-	 * starts first and ends between the start and end date of the other event,
-	 * start between the start and end date of the other event and ends after the other end date
-	 * and the last possible way, starts and ends between the start and end dates from the other event.
+	/**
+	 * Checks if the current event collides with another event.
+	 * 
+	 * @param other
+	 * @return
 	 */
 	public boolean collidesWithEvent(Event other) {
+		
+		//Check if both Events are on the same month
 		if(this.getStartDate().getMonth().equals(other.getStartDate().getMonth())) {
+			
+			//Check if both Events are on the same day
 			if(this.getStartDate().getDayOfMonth() == other.getStartDate().getDayOfMonth()) {
-				
-				//começa a mesma hora
+
+				//Check if both Events are on the same time
 				if(other.getStartDate().isEqual(this.getStartDate())) {
 					return true;
 				}
 
-				//comeca antes acaba depois
+				//Check if the other Event starts before this Event and ends after this event
 				if(other.getStartDate().isBefore(this.getStartDate()) 
-					&& other.getEndDate().isAfter(this.getEndDate())) {
+						&& other.getEndDate().isAfter(this.getEndDate())) {
 					return true;
 				}
-				//comeca antes acaba dentro
+				
+				//Check if the other Event starts before this Event and ends during this event
 				if(other.getStartDate().isBefore(this.getStartDate()) 
-					&& other.getEndDate().isAfter(this.getStartDate()) 
-					&& other.getEndDate().isBefore(this.getEndDate())) {
+						&& other.getEndDate().isAfter(this.getStartDate()) 
+						&& other.getEndDate().isBefore(this.getEndDate())) {
 					return true;
 				}
-				//comeca dentro acaba depois
+				
+				//Check if the other Event starts during this Event and ends after this event
 				if(other.getStartDate().isAfter(this.getStartDate()) 
-					&& other.getStartDate().isBefore(this.getEndDate()) 
-					&& other.getEndDate().isAfter(this.getEndDate())) {
+						&& other.getStartDate().isBefore(this.getEndDate()) 
+						&& other.getEndDate().isAfter(this.getEndDate())) {
 
 					return true;
 				}
-				//comeca dentro acaba dentro
+				
+				//Check if the other Event starts during this Event and ends during this event
 				if(other.getStartDate().isAfter(this.getStartDate()) 
-					&& other.getEndDate().isBefore(this.getEndDate())) {
+						&& other.getEndDate().isBefore(this.getEndDate())) {
 					return true;
 				}
 			}
@@ -148,20 +211,11 @@ public class Event implements Comparable<Event> {
 	}
 
 
-//	@Override
-//	public Event clone() throws CloneNotSupportedException {
-//		LocalDateTime clonedStartDate = (LocalDateTime) this.startDate.clone();
-//		LocalDateTime clonedEndDate = (LocalDateTime) this.endDate.clone();
-//		String clonedSummary = this.summary;
-//		List<Element> cloneList = new ArrayList<>();
-//		for (Element e: elements) cloneList.add(e.clone());
-//		Event cloneEvent = new Event(clonedStartDate, clonedEndDate, clonedSummary, cloneList);
-//		return cloneEvent;
-//	}
-	
-
 	/**
-	 * @return a boolean saying if the comparing objects are equal(true) or not(false).
+	 * Determines whether two Event objects are equal.
+	 * 
+	 * @param obj the object to compare this Event to
+	 * @return true if the objects are equal, false otherwise
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -175,12 +229,14 @@ public class Event implements Comparable<Event> {
 		return endDate.equals(other.endDate) && startDate.equals(other.startDate)
 				&& summary.equals(other.summary);
 	}
-	
+
 
 	/**
-	 * @return a negative integer, zero, or a positive integer as this Event is before date, equal to, or greater than the specified date.
+	 * Compares this Event to another Event.
+	 * 
+	 * @param other the Event to compare this Event to
+	 * @return a negative integer, zero, or a positive integer as this Event is before date, equal to, or greater than the specified date
 	 */
-
 	@Override
 	public int compareTo(Event other) {
 		if(other.endDate.compareTo(this.startDate) <= 0) 
@@ -189,9 +245,11 @@ public class Event implements Comparable<Event> {
 			return -1;
 		return 0;
 	}
-	
+
 	/**
-	 * @return a string representing the event.
+	 * Returns a string representation of this Event.
+	 * 
+	 * @return a string representing the Event
 	 */
 	@Override
 	public String toString() {
