@@ -11,11 +11,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.ConstraintViolationException;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 
 /**
@@ -68,7 +68,13 @@ public class Schedule {
 		Boolean bAux = false;
 
 		for(CalendarComponent comp : calendar.getComponents()) {
-			Event newEvent = newEvent(element, comp);
+			String aux = (String) comp.getRequiredProperty("DTSTART").getValue();
+			LocalDateTime startDate = LocalDateTime.parse(aux.replaceAll("Z$", ""), inputDateFormat);
+			String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
+			LocalDateTime endDate = LocalDateTime.parse(aux2.replaceAll("Z$", ""), inputDateFormat);
+			String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
+			String finalSummary = filterString(summary);				
+			Event newEvent = new Event(startDate,endDate,finalSummary,element);
 			int indexOfNewEvent = events.indexOf(newEvent);
 			if(indexOfNewEvent != -1) {
 				events.get(indexOfNewEvent).addElement(element);
@@ -86,17 +92,6 @@ public class Schedule {
 		for(Event e : this.events) {
 			System.out.println(e.toString());
 		}
-	}
-
-	private Event newEvent(Element element, CalendarComponent comp) throws ConstraintViolationException {
-		String aux = (String) comp.getRequiredProperty("DTSTART").getValue();
-		LocalDateTime startDate = LocalDateTime.parse(aux.replaceAll("Z$", ""), inputDateFormat);
-		String aux2 = (String) comp.getRequiredProperty("DTEND").getValue();
-		LocalDateTime endDate = LocalDateTime.parse(aux2.replaceAll("Z$", ""), inputDateFormat);
-		String summary = (String) comp.getRequiredProperty("SUMMARY").getValue();
-		String finalSummary = filterString(summary);
-		Event newEvent = new Event(startDate, endDate, finalSummary, element);
-		return newEvent;
 	}
 		
 	/**
@@ -158,10 +153,12 @@ public class Schedule {
 	 * @return the new schedule for the specific element.
 	 */
 	public Schedule readCalendar(Element element) {
-		if(elements.size() == 0)
+		if(elements.size() == 0) {
 			System.out.println("Elements are empty!");
-		if(!elements.contains(element))
+		}
+		if(!elements.contains(element)) {
 			System.out.println("Insert a valid Element!");
+		}
 		List<Event> filteredList = events.stream().filter(event -> event.getElements().contains(element)).collect(Collectors.toList());
 		List<Event> newList = new ArrayList<>();
 		for(Event e : filteredList) {
@@ -422,5 +419,15 @@ public class Schedule {
 	public void setEvents(List<Event> events) {
 		this.events = events;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+	    if (this == o) return true;
+	    if (o == null || getClass() != o.getClass()) return false;
+	    Schedule schedule = (Schedule) o;
+	    return Objects.equals(events, schedule.events) &&
+	            Objects.equals(elements, schedule.elements);
+	}
+
 
 }

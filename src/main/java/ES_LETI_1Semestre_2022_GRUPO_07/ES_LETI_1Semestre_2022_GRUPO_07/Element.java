@@ -3,6 +3,8 @@ package ES_LETI_1Semestre_2022_GRUPO_07.ES_LETI_1Semestre_2022_GRUPO_07;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import net.fortuna.ical4j.model.property.Url;
+
 
 /**
  * Represents an element with a name and a web link.
@@ -20,8 +22,8 @@ public class Element {
 	 * @param webLink the web link of the element.
 	 */
 	public Element(String name, String webLink) {
-		this.webLink = webLink;
 		this.name = name;
+		this.webLink = webLink;
 	}
 	
 	/**
@@ -49,23 +51,6 @@ public class Element {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Creates a new Element object with the same name and web link
-	 * as the original Element object.
-	 * 
-	 * @return a new Element object with the same name and web link
-	 *         as the original Element object
-	 * @throws CloneNotSupportedException if the Element class does not
-	 *         implement the Cloneable interface
-	 */
-	@Override
-	public Element clone() throws CloneNotSupportedException {
-		String clonedName = this.name;
-		String clonedWebLink = this.webLink;
-		Element clonedElement = new Element(clonedName, clonedWebLink);
-		return clonedElement;
 	}
 
 	/**

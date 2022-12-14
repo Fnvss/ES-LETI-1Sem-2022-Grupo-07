@@ -91,4 +91,14 @@ public class Week {
 	public String toString() {
 		return "Week of the " + getDay(DayOfWeek.MONDAY);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Week that = (Week) o;
+		return days.equals(that.days);
+	}
+	
 }
