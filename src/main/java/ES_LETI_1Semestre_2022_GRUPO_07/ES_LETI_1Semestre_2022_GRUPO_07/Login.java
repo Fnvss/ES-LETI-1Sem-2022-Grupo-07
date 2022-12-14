@@ -16,6 +16,22 @@ import org.jdesktop.swingx.JXTextField;
 
 import net.fortuna.ical4j.data.ParserException;
 
+/**
+ * The Login class is used to create a login menu for a meeting planner.
+ * It extends the ActionListener interface, so that it can receive notifications
+ * of events that occur when an action is performed.
+ *
+ * The Login class has several instance variables, including JFrame, JXTextField,
+ * JPanel, JLabel, and JButton objects. It also includes a static Schedule object
+ * and an instance object of the Login class itself.
+ *
+ * The Login class has a constructor that sets up and displays a window with
+ * several components, such as text fields and buttons, inside of it. The
+ * constructor also adds action listeners to the buttons, so that the buttons can
+ * perform an action when clicked. When an action is performed, the actionPerformed
+ * method is called. This method handles the events that occur when the buttons
+ * are clicked.
+ */
 public class Login implements ActionListener {
 	
 	JFrame frame = new JFrame();
@@ -29,22 +45,6 @@ public class Login implements ActionListener {
 	JButton seeMembersList = new JButton("Elements List");
 	JButton reunionButton = new JButton("Set up a meeting");
 
-	/**
-	 * The Login class is used to create a login menu for a meeting planner.
-	 * It extends the ActionListener interface, so that it can receive notifications
-	 * of events that occur when an action is performed.
-	 *
-	 * The Login class has several instance variables, including JFrame, JXTextField,
-	 * JPanel, JLabel, and JButton objects. It also includes a static Schedule object
-	 * and an instance object of the Login class itself.
-	 *
-	 * The Login class has a constructor that sets up and displays a window with
-	 * several components, such as text fields and buttons, inside of it. The
-	 * constructor also adds action listeners to the buttons, so that the buttons can
-	 * perform an action when clicked. When an action is performed, the actionPerformed
-	 * method is called. This method handles the events that occur when the buttons
-	 * are clicked.
-	 */
 	public static Login instance;
 
 	/**
