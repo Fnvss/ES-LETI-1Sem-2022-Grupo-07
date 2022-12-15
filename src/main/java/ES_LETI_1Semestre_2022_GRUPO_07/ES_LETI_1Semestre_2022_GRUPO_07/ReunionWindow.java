@@ -44,7 +44,7 @@ public class ReunionWindow implements ActionListener {
 	JButton submitPeriodicButton = new JButton("Submit Periodic Reunion");
 	JList list;
 	JLabel dateLabel = new JLabel("Duration: ");
-	JLabel reunionsLabel = new JLabel("Nº Reunions:");
+	JLabel reunionsLabel = new JLabel("NÂº Reunions:");
 	TimeOfDay timeOfDay;
 	String time;
 	JXTextField duration = new JXTextField();
@@ -250,6 +250,7 @@ public class ReunionWindow implements ActionListener {
 					try {
 						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.checkAvailableDate(elementsReunion, timeOfDay, durationTime);
+						JOptionPane.showMessageDialog(null, "Sucess! Reunion registered");
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -272,6 +273,7 @@ public class ReunionWindow implements ActionListener {
 						number = Integer.parseInt(numberOfReunions.getText());
 						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime, number);
+						JOptionPane.showMessageDialog(null, "Sucess! Periodic reunion registered");
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -285,4 +287,3 @@ public class ReunionWindow implements ActionListener {
 	}
 
 }
-
