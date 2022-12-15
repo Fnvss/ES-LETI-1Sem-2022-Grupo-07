@@ -250,6 +250,7 @@ public class ReunionWindow implements ActionListener {
 					try {
 						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.checkAvailableDate(elementsReunion, timeOfDay, durationTime);
+						JOptionPane.showMessageDialog(null, "Sucess! Reunion registered");
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -272,6 +273,7 @@ public class ReunionWindow implements ActionListener {
 						number = Integer.parseInt(numberOfReunions.getText());
 						durationTime = Integer.parseInt(duration.getText());
 						Login.schedule.periodicReunion(elementsReunion, timeOfDay, durationTime, periodicityTime, number);
+						JOptionPane.showMessageDialog(null, "Sucess! Periodic reunion registered");
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
